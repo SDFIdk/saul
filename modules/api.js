@@ -4,17 +4,17 @@
 
 /** 
  * HTTP GET request from API
- * @param {Object} service - API service object. Must contain `baseUrl` and `apiToken` properties
+ * @param {Object} service - API service object. Must contain `baseUrl` and `token` properties
  * @param {String} params - path fragment and url parameters for a specific endpoint request
  */
 function get(service, params) {
-  if (!service.apiToken || !service.baseUrl) {
+  if (!service.token || !service.baseUrl) {
     console.error('Missing API token or URL')
     return false
   } else {
     return fetch( service.baseUrl + params, {
       headers: {
-        'token': service.apiToken
+        'token': service.token
       }
     })
     .then((response) => {

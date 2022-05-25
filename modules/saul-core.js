@@ -40,7 +40,7 @@ function world2image(image_data, lat, lon) {
   return image_coords
 }
 
-export default { 
+export { 
   image2world,
   world2image
 }

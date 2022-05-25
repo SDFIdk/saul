@@ -1,4 +1,4 @@
-// Import modules and define public methods
+// Import/export modules with their public methods
 export {image2world,world2image} from './modules/saul-core.js'
 export {get} from './modules/api.js'
 

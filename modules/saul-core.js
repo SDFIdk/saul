@@ -36,8 +36,8 @@ function world2image(image_data, lat, lon, cote = 0) {
   const omega = image_data.properties['pers:omega'] 
   const phi = image_data.properties['pers:phi'] 
   const kappa = image_data.properties['pers:kappa']
-  const sensor_array_dimension_x = image_data.properties['pers:pers:interior_orientation'].sensor_array_dimensions[0] 
-  const sensor_array_dimension_y = image_data.properties['pers:pers:interior_orientation'].sensor_array_dimensions[1]
+  const sensor_array_dimension_x = image_data.properties['pers:interior_orientation'].sensor_array_dimensions[0] 
+  const sensor_array_dimension_y = image_data.properties['pers:interior_orientation'].sensor_array_dimensions[1]
   const rotation_matrix = image_data.properties['pers:rotation_matrix'] // This is an array of numbers
   const bbox = image_data.bbox // ie. [x1,y1,x2,y2]
 

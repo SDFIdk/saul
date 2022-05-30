@@ -3,18 +3,17 @@
  */
 
 /** 
- * HTTP GET request from API
- * @param {Object} service - API service object. Must contain `baseUrl` and `token` properties
- * @param {String} params - path fragment and url parameters for a specific endpoint request
+ * GET HTTP responsee from API
+ * @param {String} url - API service URL, including endpoint paths and query parameters.
+ * @param {String} token - Authentication token from Dataforsyningen
  */
-function get(service, params) {
-  if (!service.token || !service.baseUrl) {
-    console.error('Missing API token or URL')
-    return false
+function get(url, token) {
+  if (!url || !token) {
+    console.error('Could not fetch data. Missing API token or URL')
   } else {
-    return fetch( service.baseUrl + params, {
+    return fetch( url, {
       headers: {
-        'token': service.token
+        'token': token
       }
     })
     .then((response) => {
@@ -22,12 +21,14 @@ function get(service, params) {
         throw new Error(`HTTP error! Status: ${ response.status }`)
       }
       // We assume the returned data is JSON
-      return JSON.parse(response)
+      return response.json()
     })
     .then((response) => {
+      // Finally, return the parsed JSON response
       return response
     })
     .catch((error) => {
+      // ... unless something goes wrong
       console.error(`Fetch error: ${error}`)
       return error
     })
@@ -37,4 +38,3 @@ function get(service, params) {
 export { 
   get
 }
- 

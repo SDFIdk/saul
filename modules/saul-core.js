@@ -28,7 +28,7 @@
  * @param {Object} image_data - skraafoto-stac-api image data
  * @param {Number} lat - latitude
  * @param {Number} lon - longitude
- * @param {Number} cote - OPTIONAL: elevation above sea level
+ * @param {Number} [cote] - elevation above sea level
  */
 function world2image(image_data, lat, lon, cote = 0) {
 

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Saul modules example page</title>
+  </head>
+  <body>
+
+    <h1>Saul modules example</h1>
+
+    <p>Just opening this example.html file might not work becuase of CORS restrictions when trying to access STAC API.</p>
+    <p>You should run this HTML file from a simple server like Python's <code>http.server</code></p>
+
+    <h2>This is the result</h2>
+    <div id="result"></div>
+
+    <script type="module">
+      import {get} from '../modules/api.js'
+      import {world2image} from '../modules/saul-core.js'
+
+      const result_display_element = document.getElementById('result')
+      let apidata = await get('https://api.dataforsyningen.dk/skraafotoapi_test/collections/skraafotos2019/items/2019_83_37_2_0046_00001113', '47dada7edade95277d7d0935ab20a593')
+
+      // Let's call an imported method
+      let calculated_result = world2image(apidata, 0, 0, 0)
+
+      // Write out result for the user to see
+      if (calculated_result) {
+
+        result.innerText = calculated_result
+      
+      } else {
+        result.innerText = 'There was no result'
+      }
+      
+
+    </script>
+
+  </body>
+</html>

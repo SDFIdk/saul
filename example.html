@@ -16,19 +16,23 @@
     <div id="result"></div>
 
     <script type="module">
-      import {get} from '../modules/api.js'
-      import {world2image} from '../modules/saul-core.js'
+      import {get} from './modules/api.js'
+      import {world2image,getZ} from './modules/saul-core.js'
 
       const result_display_element = document.getElementById('result')
       let apidata = await get('https://api.dataforsyningen.dk/skraafotoapi_test/collections/skraafotos2019/items/2019_83_37_2_0046_00001113', '47dada7edade95277d7d0935ab20a593')
 
       // Let's call an imported method
-      let calculated_result = world2image(apidata, 0, 0, 0)
+      let calculated_result = world2image(apidata, 580151.3881095058,6131034.532242722, 0)
+      //let retrieved_z = getZ(5)
+
+      //result.innerText = retrieved_z
 
       // Write out result for the user to see
       if (calculated_result) {
 
         result.innerText = calculated_result
+        //result.innerText = apidata
       
       } else {
         result.innerText = 'There was no result'

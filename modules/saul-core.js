@@ -2,6 +2,13 @@
  * SAUL photogrammetry utilities 
  */
 
+/**
+ * Import constants, passwords and more 
+ */ 
+
+ import { DF_pass,DF_user } from "./config.js";
+//<script type="module" src="/config.js"></script>
+
 /** 
  * Converts x,y coordinates from an image to real world lat,lon coordinates
  * @param {Object} image_data - skraafoto-stac-api image data
@@ -118,7 +125,7 @@ function radians(degrees) {
  */
 function getZ(xcoor,ycoor) {
   $.ajaxSetup({async : false})
-  let zcoor = $.getJSON('https://services.datafordeler.dk/DHMTerraen/DHMKoter/1.0.0/GEOREST/HentKoter?username=XHHPDEGOXD&password=JOB2020adgang!&geop=POINT(' + xcoor + ' ' + ycoor +')&elevationmodel=dsm', function(data) {
+  let zcoor = $.getJSON('https://services.datafordeler.dk/DHMTerraen/DHMKoter/1.0.0/GEOREST/HentKoter?username='+ DF_user + '&password=' + DF_pass +'&geop=POINT(' + xcoor + ' ' + ycoor +')&elevationmodel=dsm', function(data) {
     // JSON result in `data` variable
   });
   

@@ -1,0 +1,4 @@
+const DF_user = "XXXXXXXXX"
+const DF_pass = "YYYYYYYYY"
+
+export {DF_pass,DF_user}

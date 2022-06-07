@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>Saul modules example page</title>
+    <script src="https://code.jquery.com/jquery-1.6.4.js"></script>
   </head>
   <body>
 
@@ -17,22 +18,39 @@
 
     <script type="module">
       import {get} from './modules/api.js'
-      import {world2image,getZ} from './modules/saul-core.js'
+      import {image2world,world2image,getZ,iterer} from './modules/saul-core.js'
+
+      let xcoor = 579782.75
+      let ycoor = 6131096.03
 
       const result_display_element = document.getElementById('result')
       let apidata = await get('https://api.dataforsyningen.dk/skraafotoapi_test/collections/skraafotos2019/items/2019_83_37_2_0046_00001113', '47dada7edade95277d7d0935ab20a593')
+      //let zcoor = await $.getJSON('https://services.datafordeler.dk/DHMTerraen/DHMKoter/1.0.0/GEOREST/HentKoter?username=XHHPDEGOXD&password=JOB2020adgang!&geop=POINT(580150 6131030)&elevationmodel=dsm', function(data) {
+      //  // JSON result in `data` variable
+      //});
 
       // Let's call an imported method
-      let calculated_result = world2image(apidata, 580151.3881095058,6131034.532242722, 0)
-      //let retrieved_z = getZ(5)
+      let zcoor = getZ(xcoor,ycoor)
+      
+      let image_coor = world2image(apidata, xcoor, ycoor, zcoor)
+      
+      let col = image_coor[0]
+      let row = image_coor[1]
+      
+      let world_coor = image2world(apidata, col, row, zcoor)
+      
+      col = 7375
+      row = 5382
+      let ite = iterer(apidata, col, row, 0.05)
 
       //result.innerText = retrieved_z
 
       // Write out result for the user to see
-      if (calculated_result) {
+      if (image_coor) {
 
-        result.innerText = calculated_result
-        //result.innerText = apidata
+        //result.innerText = xcoor + ' ' + ycoor + ' ' + zcoor + '\n' + image_coor[0] + '  ' + image_coor[1] + '\n' + world_coor[0] + '  ' + world_coor[1]
+        result.innerText = xcoor + ' ' + ycoor + ' ' + zcoor + '\n' + image_coor[0] + '  ' + image_coor[1] + '\n' +ite
+        //result.innerText = JSON.stringify(apidata)
       
       } else {
         result.innerText = 'There was no result'

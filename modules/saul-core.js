@@ -8,7 +8,7 @@
  * @param {Number} image_x - Image x coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
  * @param {Number} image_y - Image y coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
  */
-  function image2world(image_data, col, row, Z=0) {
+  function image2world(image_data, col, row, Z) {
 
   // constants pulled from image_data
   const xx0  = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
@@ -28,20 +28,21 @@
   var c = ci*(-1)
   var dimX = dimXi*pix/2*(-1)
   var dimY = dimYi*pix/2*(-1)
+  row = dimYi - row
   
   // ... Do calculations ...
   var o = radians(Ome)
   var p = radians(Phi)
   var k = radians(Kap)
-  var D11 =   math.cos(p) * math.cos(k)
-  var D12 = - math.cos(p) * math.sin(k)
-  var D13 =   math.sin(p)
-  var D21 =   math.cos(o) * math.sin(k) + math.sin(o) * math.sin(p) * math.cos(k)
-  var D22 =   math.cos(o) * math.cos(k) - math.sin(o) * math.sin(p) * math.sin(k)
-  var D23 = - math.sin(o) * math.cos(p)
-  var D31 =   math.sin(o) * math.sin(k) - math.cos(o) * math.sin(p) * math.cos(k)
-  var D32 =   math.sin(o) * math.cos(k) + math.cos(o) * math.sin(p) * math.sin(k)
-  var D33 =   math.cos(o) * math.cos(p)
+  var D11 =   Math.cos(p) * Math.cos(k)
+  var D12 = - Math.cos(p) * Math.sin(k)
+  var D13 =   Math.sin(p)
+  var D21 =   Math.cos(o) * Math.sin(k) + Math.sin(o) * Math.sin(p) * Math.cos(k)
+  var D22 =   Math.cos(o) * Math.cos(k) - Math.sin(o) * Math.sin(p) * Math.sin(k)
+  var D23 = - Math.sin(o) * Math.cos(p)
+  var D31 =   Math.sin(o) * Math.sin(k) - Math.cos(o) * Math.sin(p) * Math.cos(k)
+  var D32 =   Math.sin(o) * Math.cos(k) + Math.cos(o) * Math.sin(p) * Math.sin(k)
+  var D33 =   Math.cos(o) * Math.cos(p)
 
   var x_dot = ((col*pix)-dimX*-1)-xx0
   var y_dot = ((row*pix)-dimY*-1)-yy0
@@ -51,15 +52,9 @@
 
   var X = (Z-Z0)*kx + X0
   var Y = (Z-Z0)*ky + Y0
-  var Z = 0
+
 
   return[X,Y,Z]
-
-  return [
-    world_coordinate_lat,
-    world_coordinate_lon,
-    world_coordinate_cote
-  ]
 }
 
 /** 
@@ -108,9 +103,8 @@ function world2image(image_data, X, Y, Z) {
   var y_dot = (-1)*c*((D12*(X-X0)+D22*(Y-Y0)+D32*(Z-Z0))/(D13*(X-X0)+D23*(Y-Y0)+D33*(Z-Z0)))
 
   var col = ((x_dot-xx0)+(dimX))*(-1)/pix
-  var row = ((y_dot-yy0)+(dimY))*(-1)/pix
+  var row = dimYi - ((y_dot-yy0)+(dimY))*(-1)/pix
 
-  //return [xx0,yy0,c,pix,dimX,dimY,X0,Y0,Z0,Ome,Phi,Kap]
   return [col, row]
 }
 
@@ -118,15 +112,44 @@ function radians(degrees) {
   return degrees * (Math.PI / 180);
 };
 
-function getZ(x) {
-  let y = x*10;
+/** 
+ * Converts lat,lon coordinates to x,y coordinates in a specific image
+ * @param {Object} zData - elevationdata
+ */
+function getZ(xcoor,ycoor) {
+  $.ajaxSetup({async : false})
+  let zcoor = $.getJSON('https://services.datafordeler.dk/DHMTerraen/DHMKoter/1.0.0/GEOREST/HentKoter?username=XHHPDEGOXD&password=JOB2020adgang!&geop=POINT(' + xcoor + ' ' + ycoor +')&elevationmodel=dsm', function(data) {
+    // JSON result in `data` variable
+  });
+  
+  var z = JSON.parse(zcoor.responseText).HentKoterRespons.data[0].kote
+  //console.log(JSON.parse(zcoor.responseText).HentKoterRespons.data[0].kote)
+  //var z= JSON.stringify(zcoor)
 
-  return [y]
+  return [z]
 }
+
+function iterer(image_data, col, row, limit){
+  var z = 0.5
+  var newZ = 100.0
+  var delta = 200.0
+  var count = 0
+  while (delta > limit) {
+    var worldcoor = image2world(image_data,col,row,z)
+    newZ = getZ(worldcoor[0],worldcoor[1])
+    delta = Math.abs(newZ - z)
+    z = newZ
+    count = count + 1
+  }
+
+  return [worldcoor, delta, count]
+
+};
 
 export { 
   image2world,
   world2image,
-  getZ
+  getZ,
+  iterer
 }
  

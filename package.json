@@ -1,5 +1,5 @@
 {
-  "name": "@SDFIdk/saul",
+  "name": "@sdfidk/saul",
   "version": "0.2.0",
   "description": "This is a collection of stand-alone methods for photogrammetry calculations and API interactions for 'Danske Skråfotos'.",
   "main": "index.js",

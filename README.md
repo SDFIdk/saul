@@ -6,23 +6,25 @@ You can use these as building blocks for your own web application that wants to 
 
 ## Install
 ```
-npm install saul
+npm install @sdfidk/saul
 ```
 
-Then create a configuration file or Javascript object with proper the values and make sure to load it into your application before using any of the SAUL utilities.
+Then create a configuration file or Javascript object with proper values and make sure to load it into your application before using any of the SAUL utilities.
 
 This package ships with an example configuration file at `/example/config.js.example`
 
 ## Use
+
+For now, you can see the available utilities by looking into `index.js`.
+
+There is an example of how to import an use those utilities in your Javascript:
 ```
-import {getSTAC} from 'saul'
+import {getSTAC} from '@sdfidk/saul'
 
-let response = await getSTAC('/some-endpoint')
+let response = await getSTAC('/some-stac-endpoint')
 ```
 
-## Final thoughts
+## Acknowledgements
 
-We welcome any feedback that might help makes this package more useful to you.
-
-Best regards,
-The SAUL team @ SDFI
+SAUL is made available under the MIT license by
+The Skråfoto Team @ [SDFI](https://sdfi.dk/)

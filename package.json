@@ -1,17 +1,23 @@
 {
-  "name": "skraafoto-saul",
-  "version": "1.0.1",
+  "name": "@SDFIdk/saul",
+  "version": "0.1.0",
   "description": "This is a collection of stand-alone methods for photogrammetry calculations and API interactions for 'Danske Skråfotos'.",
   "main": "index.js",
+  "scripts": {
+    "test": "exit 0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SDFIdk/saul.git"
   },
-  "keywords": ["skråfoto", "SDFI"],
-  "author": "iamfrank <frtho@sdfi.dk> (https://sdfi.dk/)",
+  "keywords": ["skråfoto", "SDFI", "saul"],
+  "author": "Styrelsen for Dataforsyning og Infrastruktur (https://sdfi.dk/)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/SDFIdk/saul/issues"
   },
-  "homepage": "https://github.com/SDFIdk/saul#readme"
+  "homepage": "https://github.com/SDFIdk/saul#readme",
+  "publishConfig": {
+    "@SDFIdk:registry": "https://npm.pkg.github.com"
+  }
 }

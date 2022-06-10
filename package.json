@@ -1,0 +1,17 @@
+{
+  "name": "skraafoto-saul",
+  "version": "1.0.1",
+  "description": "This is a collection of stand-alone methods for photogrammetry calculations and API interactions for 'Danske Skråfotos'.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SDFIdk/saul.git"
+  },
+  "keywords": ["skråfoto", "SDFI"],
+  "author": "iamfrank <frtho@sdfi.dk> (https://sdfi.dk/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SDFIdk/saul/issues"
+  },
+  "homepage": "https://github.com/SDFIdk/saul#readme"
+}

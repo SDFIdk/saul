@@ -1,5 +1,5 @@
 {
-  "name": "saul-skraafoto",
+  "name": "skraafoto-saul",
   "version": "1.2.2",
   "description": "This is a collection of stand-alone methods for photogrammetry calculations and API interactions for 'Danske Skråfotos'.",
   "main": "index.js",
@@ -20,8 +20,5 @@
   "bugs": {
     "url": "https://github.com/SDFIdk/saul/issues"
   },
-  "homepage": "https://github.com/SDFIdk/saul#readme",
-  "publishConfig": {
-    "@SDFIdk:registry": "https://npm.pkg.github.com"
-  }
+  "homepage": "https://github.com/SDFIdk/saul#readme"
 }

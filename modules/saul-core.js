@@ -7,10 +7,11 @@ import { getDHM } from './api.js'
 /** 
  * Converts x,y coordinates from an image to real world lat,lon coordinates
  * @param {Object} image_data - skraafoto-stac-api image data
- * @param {Number} image_x - Image x coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
- * @param {Number} image_y - Image y coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {Number} col - Image x coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {Number} row - Image y coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {Number} [Z] - elevation (geoide)
  */
-function image2world(image_data, col, row, Z) {
+function image2world(image_data, col, row, Z = 0) {
 
   // constants pulled from image_data
   const xx0  = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
@@ -60,7 +61,7 @@ function image2world(image_data, col, row, Z) {
 }
 
 /** 
- * Converts lat,lon coordinates to x,y coordinates in a specific image
+ * Converts lat,lon coordinates to x,y coordinates within a specific image
  * @param {Object} image_data - skraafoto-stac-api image data
  * @param {Number} Y - northing
  * @param {Number} X - easting

@@ -11,9 +11,9 @@ import {world2image, image2world, getZ, iterate} from '../modules/saul-core.js'
 // Test getZ
 try {
 
-  let elevation = await getZ(579782.75,6131096.03, auth)
+  let elevation = await getZ(580341.2884785153,6130925.477182463, auth)
 
-  assert.strictEqual(elevation, 27.181192, "This is not the Z value we were hoping for.")
+  assert.strictEqual(elevation, 31.100582, "This is not the Z value we were hoping for.")
   
   console.log("Test getZ Ok")
 

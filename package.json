@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node ./test/saul-core.test.js"
+    "test": "node ./test/coordinate-transformation.test.js && node ./test/saul-core.test.js"
   },
   "repository": {
     "type": "git",

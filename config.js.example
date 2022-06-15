@@ -1,4 +1,4 @@
-const environment = {
+export const environment = {
   
   // STAC TOKEN can be aquired from https://dataforsyningen.dk/
   API_STAC_TOKEN: "",

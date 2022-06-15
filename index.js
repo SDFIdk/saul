@@ -10,6 +10,10 @@ export {
   postSTAC,
   getSTAC,
   getDHM,
-  get
+  get,
+  post
 } from './modules/api.js'
- 
+
+export {
+  WGS84toEPSG25832
+} from './modules/coordinate-transformations.js'

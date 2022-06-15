@@ -2,13 +2,6 @@
  * SAUL API utilities 
  */
 
-// Get environment variables
-const api_stac_baseurl = environment.API_STAC_BASEURL ? environment.API_STAC_BASEURL : ''
-const api_stac_token = environment.API_STAC_TOKEN ? environment.API_STAC_TOKEN : ''
-const api_dhm_baseurl = environment.API_DHM_BASEURL ? environment.API_DHM_BASEURL : ''
-const api_dhm_username = environment.API_DHM_USERNAME ? environment.API_DHM_USERNAME : ''
-const api_dhm_password = environment.API_DHM_PASSWORD ? environment.API_DHM_PASSWORD : ''
-
 function HttpResponseHandler(response) {
   if (!response.ok) {
     throw new Error(`HTTP error! Status: ${ response.status }`)
@@ -78,24 +71,25 @@ function post(url, requestbody, token) {
   }
 }
 
-function getDHM(query) {
-  const auth_params = `&username=${api_dhm_username}&password=${api_dhm_password}`
-  return get(encodeURI(api_dhm_baseurl + query + auth_params))
+function getDHM(query, env) {
+  const auth_params = `&username=${env.API_DHM_USERNAME}&password=${env.API_DHM_PASSWORD}`
+  return get(encodeURI(env.API_DHM_BASEURL + query + auth_params))
   .then((data) => data)
 }
 
-function getSTAC(query) {
-  return get(api_stac_baseurl + query, {headers: {'token': api_stac_token}})
+function getSTAC(query, env) {
+  return get(env.API_STAC_BASEURL + query, {headers: {'token': env.API_STAC_TOKEN}})
   .then((data) => data)
 }
 
-function postSTAC(endpoint, data) {
-  return post(api_stac_baseurl + endpoint, data, api_stac_token)
+function postSTAC(endpoint, data, env) {
+  return post(env.API_STAC_BASEURL + endpoint, data, env.API_STAC_TOKEN)
   .then((data) => data)
 }
 
 export {
   get,
+  post,
   getSTAC,
   postSTAC,
   getDHM

@@ -7,8 +7,8 @@ import { getDHM } from './api.js'
 /** 
  * Converts x,y coordinates from an image to real world lat,lon coordinates
  * @param {Object} image_data - skraafoto-stac-api image data
- * @param {Number} col - Image x coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
- * @param {Number} row - Image y coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {Number} col - Image x coordinate (from left to right). Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {Number} row - Image y coordinate (from top to bottom). Should be a coordinate for the entire image, not just the part displayed in the viewport.
  * @param {Number} [Z] - elevation (geoide)
  */
 function image2world(image_data, col, row, Z = 0) {

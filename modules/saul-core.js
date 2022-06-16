@@ -6,10 +6,11 @@ import { getDHM } from './api.js'
 
 /** 
  * Converts x,y coordinates from an image to real world lat,lon coordinates
- * @param {Object} image_data - skraafoto-stac-api image data
- * @param {Number} col - Image x coordinate (from left to right). Should be a coordinate for the entire image, not just the part displayed in the viewport.
- * @param {Number} row - Image y coordinate (from top to bottom). Should be a coordinate for the entire image, not just the part displayed in the viewport.
- * @param {Number} [Z] - elevation (geoide)
+ * @param {object} image_data - skraafoto-stac-api image data
+ * @param {number} col - Image x coordinate (from left to right). Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {number} row - Image y coordinate (from top to bottom). Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {number} [Z] - Elevation (geoide)
+ * @returns {array} [longitude, latitude, elevation] 
  */
 function image2world(image_data, col, row, Z = 0) {
 
@@ -66,6 +67,7 @@ function image2world(image_data, col, row, Z = 0) {
  * @param {Number} Y - northing
  * @param {Number} X - easting
  * @param {Number} Z - elevation (geoide)
+ * @returns {array} [x,y] Column/row image coordinate 
  */
 function world2image(image_data, X, Y, Z) {
 
@@ -111,6 +113,7 @@ function world2image(image_data, X, Y, Z) {
   return [col, row]
 }
 
+/** Converts degress to radians */
 function radians(degrees) {
   return degrees * (Math.PI / 180)
 }
@@ -119,20 +122,22 @@ function radians(degrees) {
  * Fetches elevation based on X,Y coordinates using DHM/Koter endpoint
  * @param {number} xcoor - EPSG:25832 X coordinate
  * @param {number} ycoor - EPSG:25832 Y coordinate
- * @param {object} env - Environment variables for API authentication. See ../config.js.example for reference.
+ * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @returns {number} Elevation in meters 
  */
-async function getZ(xcoor, ycoor, env) {
-  let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dsm`, env)
+async function getZ(xcoor, ycoor, auth) {
+  let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dsm`, auth)
   let z = zcoor_data.HentKoterRespons.data[0].kote
   return z
 }
 
-function iterateRecursive(image_data, col, row, z, count, limit, env) {
+/** Iterates guessing at a world coordinate using image coordinates and elevation info */
+function iterateRecursive(image_data, col, row, z, count, limit, auth) {
   // Get coordinates based on current z value
   const worldcoor = image2world(image_data,col,row,z)
 
   // Get new z value from coordinates
-  return getZ(worldcoor[0],worldcoor[1], env).then((new_z) => {
+  return getZ(worldcoor[0],worldcoor[1], auth).then((new_z) => {
     
     // How big is the different between z and new z?
     const delta = Math.abs(new_z - z)
@@ -140,7 +145,7 @@ function iterateRecursive(image_data, col, row, z, count, limit, env) {
     if (delta >= limit) {
       // If the difference is too big, try building coordinates with the new z
       count = count + 1
-      return iterateRecursive(image_data, col, row, new_z, count, limit, env)
+      return iterateRecursive(image_data, col, row, new_z, count, limit, auth)
     } else {
       // If the difference is small, return coordinates
       return [worldcoor, delta, count]
@@ -149,15 +154,16 @@ function iterateRecursive(image_data, col, row, z, count, limit, env) {
 }
 
 /** 
- * Tries to guess coordinates and elevation for a pixel position within an image using STAC API image data.
+ * Tries to guess world coordinate for a pixel position within an image using STAC API image data.
  * @param {object} image_data - image item data from STAC API
  * @param {number} col - image x coordinate (from left to right)
  * @param {number} row - image y coordinate (from top to bottom)
- * @param {object} env - Environment variables for API authentication. See ../config.js.example for reference.
+ * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
  * @param {number} [limit] - result may be inaccurate within this limit. Default is 0.1.
+ * @returns {array} [world coordindates (array), elevation discrepancy, calculation iterations]
  */
-async function iterate(image_data, col, row, env, limit = 0.1) {
-  return iterateRecursive(image_data, col, row, 0.5, 0, limit, env)
+async function iterate(image_data, col, row, auth, limit = 0.1) {
+  return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth)
 }
 
 export { 

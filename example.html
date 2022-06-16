@@ -4,11 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>Saul modules example page</title>
-    <!-- 
-      You should add your own config.js with proper tokens, passwords, etc.
-      Check config.js.example for info on how to set it up 
-    -->
-    <script src="config.js"></script>
   </head>
   <body>
 
@@ -21,16 +16,21 @@
     <div id="result"></div>
 
     <script type="module">
-      import {getSTAC, image2world, world2image, getZ, iterate} from '../index.js'
+
+      // You should add your own config.js with proper tokens, passwords, etc.
+      // Check config.js.example for info on how to set it up 
+      import auth from './config.js'
+      
+      import {getSTAC, image2world, world2image, getZ, iterate} from './index.js'
 
       let xcoor = 579782.75
       let ycoor = 6131096.03
 
       const result_display_element = document.getElementById('result')
-      let apidata = await getSTAC('/collections/skraafotos2019/items/2019_83_37_2_0046_00001113')
+      let apidata = await getSTAC('/collections/skraafotos2019/items/2019_83_37_2_0046_00001113', auth)
 
       // Let's call an imported method
-      let zcoor = await getZ(xcoor,ycoor)
+      let zcoor = await getZ(xcoor, ycoor, auth)
       
       let image_coor = world2image(apidata, xcoor, ycoor, zcoor)
       
@@ -41,7 +41,7 @@
       
       col = 7375
       row = 5382
-      let ite = iterate(apidata, col, row, 0.05)
+      let ite = await iterate(apidata, col, row, auth, 0.05)
 
       // Write out result for the user to see
       if (image_coor) {

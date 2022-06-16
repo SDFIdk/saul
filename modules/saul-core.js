@@ -121,7 +121,7 @@ function radians(degrees) {
  * @param {number} ycoor - EPSG:25832 Y coordinate
  * @param {object} env - Environment variables for API authentication. See ../config.js.example for reference.
  */
-async function getZ(xcoor,ycoor, env) {
+async function getZ(xcoor, ycoor, env) {
   let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dsm`, env)
   let z = zcoor_data.HentKoterRespons.data[0].kote
   return z

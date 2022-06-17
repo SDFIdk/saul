@@ -15,5 +15,6 @@ export {
 } from './modules/api.js'
 
 export {
-  WGS84toEPSG25832
-} from './modules/coordinate-transformations.js'
+  epsg25832proj,
+  createTranslator
+} from './modules/saul-projection.js'

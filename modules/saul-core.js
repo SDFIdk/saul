@@ -66,10 +66,10 @@ function image2world(image_data, col, row, Z = 0) {
  * @param {Object} image_data - skraafoto-stac-api image data
  * @param {Number} Y - northing
  * @param {Number} X - easting
- * @param {Number} Z - elevation (geoide)
+ * @param {Number} [Z] - elevation (geoide)
  * @returns {array} [x,y] Column/row image coordinate 
  */
-function world2image(image_data, X, Y, Z) {
+function world2image(image_data, X, Y, Z = 0) {
 
   // constants pulled from image_data
   const xx0  = image_data.properties['pers:interior_orientation'].principal_point_offset[0]

@@ -1,10 +1,12 @@
 {
   "name": "skraafoto-saul",
-  "version": "1.2.2",
+  "version": "2.0.0",
   "description": "This is a collection of stand-alone methods for photogrammetry calculations and API interactions for 'Danske Skråfotos'.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "exit 0"
+    "test": "echo 'TESTS WILL ONLY RUN UNDER NODE v18' && node ./test/saul-projection.test.js && node ./test/saul-core.test.js",
+    "docs": "jsdoc ./modules/*.js --destination docs"
   },
   "repository": {
     "type": "git",
@@ -20,5 +22,11 @@
   "bugs": {
     "url": "https://github.com/SDFIdk/saul/issues"
   },
-  "homepage": "https://github.com/SDFIdk/saul#readme"
+  "homepage": "https://github.com/SDFIdk/saul#readme",
+  "devDependencies": {
+    "jsdoc": "^3.6.10"
+  },
+  "dependencies": {
+    "proj4": "^2.8.0"
+  }
 }

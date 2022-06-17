@@ -5,8 +5,9 @@ This is a collection of stand-alone methods for photogrammetry calculations and 
 You can use these as building blocks for your own web application that wants to interface with STAC API for Danske Skråfotos.
 
 ## Install
+Install from [Github](https://github.com/SDFIdk/saul) (latest):
 ```
-npm install @sdfidk/saul
+npm install --save git@github.com:SDFIdk/saul.git
 ```
 
 Then create a configuration file or Javascript object with proper values and make sure to load it into your application before using any of the SAUL utilities.

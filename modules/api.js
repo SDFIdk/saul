@@ -2,13 +2,7 @@
  * SAUL API utilities 
  */
 
-// Get environment variables
-const api_stac_baseurl = environment.API_STAC_BASEURL ? environment.API_STAC_BASEURL : ''
-const api_stac_token = environment.API_STAC_TOKEN ? environment.API_STAC_TOKEN : ''
-const api_dhm_baseurl = environment.API_DHM_BASEURL ? environment.API_DHM_BASEURL : ''
-const api_dhm_username = environment.API_DHM_USERNAME ? environment.API_DHM_USERNAME : ''
-const api_dhm_password = environment.API_DHM_PASSWORD ? environment.API_DHM_PASSWORD : ''
-
+/** Returns JSON response data */
 function HttpResponseHandler(response) {
   if (!response.ok) {
     throw new Error(`HTTP error! Status: ${ response.status }`)
@@ -19,8 +13,9 @@ function HttpResponseHandler(response) {
 
 /** 
  * GET HTTP responsee from API
- * @param {String} url - API service URL, including endpoint paths and query parameters.
- * @param {Object} [config] - Custom request configs. See https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#supplying_request_options
+ * @param {string} url - API service URL, including endpoint paths and query parameters.
+ * @param {object} [config] - Custom request configs. See https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#supplying_request_options
+ * @returns {object} response object
  */
 function get(url, config = {}) {
   if (!url) {
@@ -47,9 +42,10 @@ function get(url, config = {}) {
 
 /** 
  * POST HTTP request to API
- * @param {String} url - API service URL, including endpoint paths and query parameters.
- * @param {Object} requestbody - Request data
- * @param {String} token - Authentication token from Dataforsyningen
+ * @param {string} url - API service URL, including endpoint paths and query parameters.
+ * @param {object} requestbody - Request data
+ * @param {string} token - Authentication token from Dataforsyningen
+ * @returns {object} response object
  */
 function post(url, requestbody, token) {
   if (!url || !token || !requestbody) {
@@ -78,24 +74,44 @@ function post(url, requestbody, token) {
   }
 }
 
-function getDHM(query) {
-  const auth_params = `&username=${api_dhm_username}&password=${api_dhm_password}`
-  return get(encodeURI(api_dhm_baseurl + query + auth_params))
+/** 
+ * API method to fetch data from DHM
+ * @param {string} query - DHM API query. Find details at https://datafordeler.dk/dataoversigt/danmarks-hoejdemodel-dhm/koter/
+ * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @returns {object} Response data
+ */
+function getDHM(query, auth) {
+  const auth_params = `&username=${auth.API_DHM_USERNAME}&password=${auth.API_DHM_PASSWORD}`
+  return get(encodeURI(auth.API_DHM_BASEURL + query + auth_params))
   .then((data) => data)
 }
 
-function getSTAC(query) {
-  return get(api_stac_baseurl + query, {headers: {'token': api_stac_token}})
+/** 
+ * API method to GET data from STAC API
+ * @param {string} query - STAC API query.
+ * @param {{API_STAC_BASEURL: string, API_STAC_TOKEN: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @returns {object} Response data
+ */
+function getSTAC(query, auth) {
+  return get(auth.API_STAC_BASEURL + query, {headers: {'token': auth.API_STAC_TOKEN}})
   .then((data) => data)
 }
 
-function postSTAC(endpoint, data) {
-  return post(api_stac_baseurl + endpoint, data, api_stac_token)
+/** 
+ * API method to POST data to STAC API
+ * @param {string} endpoint - STAC API endpoint. Ex. `/collections`
+ * @param {object} data - request body
+ * @param {{API_STAC_BASEURL: string, API_STAC_TOKEN: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @returns {object} Reponse data
+ */
+function postSTAC(endpoint, data, auth) {
+  return post(auth.API_STAC_BASEURL + endpoint, data, auth.API_STAC_TOKEN)
   .then((data) => data)
 }
 
 export {
   get,
+  post,
   getSTAC,
   postSTAC,
   getDHM

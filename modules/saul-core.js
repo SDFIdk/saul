@@ -6,11 +6,13 @@ import { getDHM } from './api.js'
 
 /** 
  * Converts x,y coordinates from an image to real world lat,lon coordinates
- * @param {Object} image_data - skraafoto-stac-api image data
- * @param {Number} image_x - Image x coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
- * @param {Number} image_y - Image y coordinate. Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {object} image_data - skraafoto-stac-api image data
+ * @param {number} col - Image x coordinate (from left to right). Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {number} row - Image y coordinate (from top to bottom). Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {number} [Z] - Elevation (geoide)
+ * @returns {array} [longitude, latitude, elevation] 
  */
-function image2world(image_data, col, row, Z) {
+function image2world(image_data, col, row, Z = 0) {
 
   // constants pulled from image_data
   const xx0  = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
@@ -60,11 +62,12 @@ function image2world(image_data, col, row, Z) {
 }
 
 /** 
- * Converts lat,lon coordinates to x,y coordinates in a specific image
+ * Converts lat,lon coordinates to x,y coordinates within a specific image
  * @param {Object} image_data - skraafoto-stac-api image data
  * @param {Number} Y - northing
  * @param {Number} X - easting
  * @param {Number} Z - elevation (geoide)
+ * @returns {array} [x,y] Column/row image coordinate 
  */
 function world2image(image_data, X, Y, Z) {
 
@@ -110,35 +113,57 @@ function world2image(image_data, X, Y, Z) {
   return [col, row]
 }
 
+/** Converts degress to radians */
 function radians(degrees) {
   return degrees * (Math.PI / 180)
 }
 
 /** 
  * Fetches elevation based on X,Y coordinates using DHM/Koter endpoint
- * @param {number} xcoor - X coordinate
- * @param {number} ycoor - Y coordinate
+ * @param {number} xcoor - EPSG:25832 X coordinate
+ * @param {number} ycoor - EPSG:25832 Y coordinate
+ * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @returns {number} Elevation in meters 
  */
-async function getZ(xcoor,ycoor) {
-  let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dsm`)
-  var z = zcoor_data.HentKoterRespons.data[0].kote
-  return [z]
+async function getZ(xcoor, ycoor, auth) {
+  let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dsm`, auth)
+  let z = zcoor_data.HentKoterRespons.data[0].kote
+  return z
 }
 
-function iterate(image_data, col, row, limit) {
-  var z = 0.5
-  var newZ = 100.0
-  var delta = 200.0
-  var count = 0
-  while (delta > limit) {
-    var worldcoor = image2world(image_data,col,row,z)
-    newZ = getZ(worldcoor[0],worldcoor[1])
-    delta = Math.abs(newZ - z)
-    z = newZ
-    count = count + 1
-  }
+/** Iterates guessing at a world coordinate using image coordinates and elevation info */
+function iterateRecursive(image_data, col, row, z, count, limit, auth) {
+  // Get coordinates based on current z value
+  const worldcoor = image2world(image_data,col,row,z)
 
-  return [worldcoor, delta, count]
+  // Get new z value from coordinates
+  return getZ(worldcoor[0],worldcoor[1], auth).then((new_z) => {
+    
+    // How big is the different between z and new z?
+    const delta = Math.abs(new_z - z)
+    
+    if (delta >= limit) {
+      // If the difference is too big, try building coordinates with the new z
+      count = count + 1
+      return iterateRecursive(image_data, col, row, new_z, count, limit, auth)
+    } else {
+      // If the difference is small, return coordinates
+      return [worldcoor, delta, count]
+    }
+  })
+}
+
+/** 
+ * Tries to guess world coordinate for a pixel position within an image using STAC API image data.
+ * @param {object} image_data - image item data from STAC API
+ * @param {number} col - image x coordinate (from left to right)
+ * @param {number} row - image y coordinate (from top to bottom)
+ * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @param {number} [limit] - result may be inaccurate within this limit. Default is 0.1.
+ * @returns {array} [world coordindates (array), elevation discrepancy, calculation iterations]
+ */
+async function iterate(image_data, col, row, auth, limit = 0.1) {
+  return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth)
 }
 
 export { 

@@ -20,6 +20,7 @@ function HttpResponseHandler(response) {
 function get(url, config = {}) {
   if (!url) {
     console.error('Could not fetch data. Missing API URL')
+    console.log('what config', config)
   } else {
     return fetch( url, {
       ...config,

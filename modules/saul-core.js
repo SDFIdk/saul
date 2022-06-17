@@ -108,7 +108,7 @@ function world2image(image_data, X, Y, Z = 0) {
   var y_dot = (-1)*c*((D12*(X-X0)+D22*(Y-Y0)+D32*(Z-Z0))/(D13*(X-X0)+D23*(Y-Y0)+D33*(Z-Z0)))
 
   var col = ((x_dot-xx0)+(dimX))*(-1)/pix
-  var row = dimYi - ((y_dot-yy0)+(dimY))*(-1)/pix
+  var row = ((y_dot-yy0)+(dimY))*(-1)/pix
 
   return [col, row]
 }

@@ -32,7 +32,6 @@ function image2world(image_data, col, row, Z = 0) {
   var c = ci*(-1)
   var dimX = dimXi*pix/2*(-1)
   var dimY = dimYi*pix/2*(-1)
-  row = dimYi - row
   
   // ... Do calculations ...
   var o = radians(Ome)
@@ -56,7 +55,6 @@ function image2world(image_data, col, row, Z = 0) {
 
   var X = (Z-Z0)*kx + X0
   var Y = (Z-Z0)*ky + Y0
-
 
   return[X,Y,Z]
 }
@@ -153,8 +151,27 @@ function iterateRecursive(image_data, col, row, z, count, limit, auth) {
   })
 }
 
+/** Compares difference between image and world coordinates and returns differences */
+function compareCoords(image_coord, world_coord) {
+  const delta_x = world_coord[0] - image_coord[0]
+  const delta_y = world_coord[1] - image_coord[1]
+  return [delta_x, delta_y]
+}
+
+/** Iterates guessing at a world coordinate using image coordinates only */
+function guessWorld(image_data, col, row, limit, initial_z = 0.5, z_adjustment_factor = 10) {
+  console.log('image coordinate', col, row)
+  const world_coord = image2world(image_data, col, row, initial_z)
+  console.log('world coordinate guess', world_coord)
+  const image_coord = world2image(image_data, world_coord[0], world_coord[1], initial_z)
+  console.log('new image coordinate from guess', image_coord)
+  const deltas = compareCoords([col, row], image_coord)
+  console.log('deltas', deltas)
+  
+}
+
 /** 
- * Tries to guess world coordinate for a pixel position within an image using STAC API image data.
+ * Tries to guess world coordinate for a pixel position within an image using STAC API image data and requests to DHM elevation data.
  * @param {object} image_data - image item data from STAC API
  * @param {number} col - image x coordinate (from left to right)
  * @param {number} row - image y coordinate (from top to bottom)
@@ -162,7 +179,7 @@ function iterateRecursive(image_data, col, row, z, count, limit, auth) {
  * @param {number} [limit] - result may be inaccurate within this limit. Default is 0.1.
  * @returns {array} [world coordindates (array), elevation discrepancy, calculation iterations]
  */
-async function iterate(image_data, col, row, auth, limit = 0.1) {
+function iterate(image_data, col, row, auth, limit = 0.1) {
   return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth)
 }
 

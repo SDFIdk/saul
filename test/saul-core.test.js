@@ -87,3 +87,33 @@ try {
 } catch(error) {
   console.error(error)
 }
+
+// Test world2image > image2world 
+try {
+
+  let xy1 = world2image(item, world_x, world_y, world_elevation)
+  let coords1 = image2world(item, xy1[0], xy1[1], world_elevation)
+
+  assert(is_equalIsh(coords1[0], world_x), "world2image > image2world fail: The longitude values are not equal")
+  assert(is_equalIsh(coords1[1], world_y), "world2image > image2world fail: The latitude values are not equal")
+
+  console.log("Test world2image > image2world OK")
+
+} catch(error) {
+  console.error(error)
+}
+
+// Test world2image > iterate 
+try {
+
+  let xy2 = world2image(item, world_x, world_y, world_elevation)
+  let coords2 = iterate(item, xy2[0], xy2[1], auth)
+
+  assert(is_equalIsh(coords2[0], world_x), "world2image > iterate fail: The longitude values are not equal")
+  assert(is_equalIsh(coords2[1], world_y), "world2image > iterate fail: The latitude values are not equal")
+
+  console.log("Test world2image > iterate OK")
+
+} catch(error) {
+  console.error(error)
+}

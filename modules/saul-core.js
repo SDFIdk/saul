@@ -130,9 +130,16 @@ async function getZ(xcoor, ycoor, auth) {
 }
 
 /** Iterates guessing at a world coordinate using image coordinates and elevation info */
-function iterateRecursive(image_data, col, row, z, count, limit, auth) {
+function iterateRecursive(image_data, col, row, z, count, limit, auth, i) {
+
   // Get coordinates based on current z value
   const worldcoor = image2world(image_data,col,row,z)
+
+  i--
+  if (i <= 0) {
+    // max iterations reached
+    return [worldcoor, 0, count]
+  }
 
   // Get new z value from coordinates
   return getZ(worldcoor[0],worldcoor[1], auth).then((new_z) => {
@@ -143,7 +150,7 @@ function iterateRecursive(image_data, col, row, z, count, limit, auth) {
     if (delta >= limit) {
       // If the difference is too big, try building coordinates with the new z
       count = count + 1
-      return iterateRecursive(image_data, col, row, new_z, count, limit, auth)
+      return iterateRecursive(image_data, col, row, new_z, count, limit, auth, i)
     } else {
       // If the difference is small, return coordinates
       return [worldcoor, delta, count]
@@ -161,7 +168,8 @@ function iterateRecursive(image_data, col, row, z, count, limit, auth) {
  * @returns {array} [world coordindates (array), elevation discrepancy, calculation iterations]
  */
 function iterate(image_data, col, row, auth, limit = 0.1) {
-  return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth)
+  let i = 20 // Maximum number of iterations allowed
+  return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth, i)
 }
 
 export { 

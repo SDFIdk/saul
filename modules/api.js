@@ -2,9 +2,21 @@
  * SAUL API utilities 
  */
 
+let error_msg
+
+const loadstart = new CustomEvent('loadstart')
+const loadend = new CustomEvent('loadend')
+const loaderror = new CustomEvent('loaderror', {
+  detail: {
+    name: error_msg
+  }
+})
+
 /** Returns JSON response data */
 function HttpResponseHandler(response) {
   if (!response.ok) {
+    error_msg = response.status
+    document.dispatchEvent('loaderror')
     throw new Error(`HTTP error! Status: ${ response.status }`)
   }
   // We assume the returned data is JSON
@@ -22,6 +34,7 @@ function get(url, config = {}) {
     console.error('Could not fetch data. Missing API URL')
     console.log('what config', config)
   } else {
+    document.dispatchEvent('loadstart')
     return fetch( url, {
       ...config,
       method: 'GET'
@@ -31,11 +44,13 @@ function get(url, config = {}) {
     })
     .then((response) => {
       // Finally, return the parsed JSON response
+      document.dispatchEvent('loadend')
       return response
     })
     .catch((error) => {
       // ... unless something goes wrong
       console.error(`Fetch error: ${error}`)
+      document.dispatchEvent('loadend')
       return error
     })
   }
@@ -52,6 +67,7 @@ function post(url, requestbody, token) {
   if (!url || !token || !requestbody) {
     console.error('Could not fetch data. Missing API token, request body, or URL')
   } else {
+    document.dispatchEvent('loadstart')
     return fetch( url, {
       method: 'POST',
       headers: {
@@ -65,11 +81,13 @@ function post(url, requestbody, token) {
     })
     .then((response) => {
       // Finally, return the parsed JSON response
+      document.dispatchEvent('loadend')
       return response
     })
     .catch((error) => {
       // ... unless something goes wrong
       console.error(`Fetch error: ${error}`)
+      document.dispatchEvent('loadend')
       return error
     })
   }

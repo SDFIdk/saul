@@ -3,20 +3,48 @@
  */
 
 let error_msg
+let load_stack = []
 
 const loadstart = new CustomEvent('loadstart')
 const loadend = new CustomEvent('loadend')
 const loaderror = new CustomEvent('loaderror', {
   detail: {
-    name: error_msg
+    name: getErrorMsg()
   }
 })
+
+/** Sends 'loadstart' event if nothing else is currently loading */
+function startLoading() {
+  if (load_stack.length < 1) {
+    document.dispatchEvent(loadstart)
+  }
+  load_stack.push(1)
+}
+
+/** Sends 'loadend' event if current loads have finished */
+function endLoading() {
+  load_stack.pop
+  if (load_stack.length > 0) {
+    document.dispatchEvent(loadend)
+  }
+}
+
+/** Sends 'loaderror' event and resets load status */
+function interruptLoading() {
+  load_stack = []
+  document.dispatchEvent(loaderror)
+}
+
+/** Getter for error messages */
+function getErrorMsg() {
+  return error_msg
+}
 
 /** Returns JSON response data */
 function HttpResponseHandler(response) {
   if (!response.ok) {
     error_msg = response.status
-    document.dispatchEvent(loaderror)
+    interruptLoading()
     throw new Error(`HTTP error! Status: ${ response.status }`)
   }
   // We assume the returned data is JSON
@@ -33,7 +61,7 @@ function get(url, config = {}) {
   if (!url) {
     console.error('Could not fetch data. Missing API URL')
   } else {
-    document.dispatchEvent(loadstart)
+    startLoading()
     return fetch( url, {
       ...config,
       method: 'GET'
@@ -43,13 +71,13 @@ function get(url, config = {}) {
     })
     .then((response) => {
       // Finally, return the parsed JSON response
-      document.dispatchEvent(loadend)
+      endLoading()
       return response
     })
     .catch((error) => {
       // ... unless something goes wrong
       console.error(`Fetch error: ${error}`)
-      document.dispatchEvent(loadend)
+      endLoading()
       return error
     })
   }
@@ -66,7 +94,7 @@ function post(url, requestbody, token) {
   if (!url || !token || !requestbody) {
     console.error('Could not fetch data. Missing API token, request body, or URL')
   } else {
-    document.dispatchEvent(loadstart)
+    startLoading()
     return fetch( url, {
       method: 'POST',
       headers: {
@@ -80,13 +108,13 @@ function post(url, requestbody, token) {
     })
     .then((response) => {
       // Finally, return the parsed JSON response
-      document.dispatchEvent(loadend)
+      endLoading()
       return response
     })
     .catch((error) => {
       // ... unless something goes wrong
       console.error(`Fetch error: ${error}`)
-      document.dispatchEvent(loadend)
+      endLoading()
       return error
     })
   }

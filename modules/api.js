@@ -24,7 +24,7 @@ function startLoading() {
 /** Sends 'loadend' event if current loads have finished */
 function endLoading() {
   load_stack.pop()
-  if (load_stack.length > 0) {
+  if (load_stack.length < 1) {
     document.dispatchEvent(loadend)
   }
 }

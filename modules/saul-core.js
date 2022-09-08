@@ -164,10 +164,10 @@ function iterateRecursive(image_data, col, row, z, count, limit, auth, i) {
  * @param {number} col - image x coordinate (from left to right)
  * @param {number} row - image y coordinate (from top to bottom)
  * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
- * @param {number} [limit] - result may be inaccurate within this limit. Default is 0.1.
+ * @param {number} [limit] - result may be inaccurate within this limit. Default is 1.
  * @returns {array} [world coordindates (array), elevation discrepancy, calculation iterations]
  */
-function iterate(image_data, col, row, auth, limit = 0.1) {
+function iterate(image_data, col, row, auth, limit = 1) {
   let i = 20 // Maximum number of iterations allowed
   return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth, i)
 }

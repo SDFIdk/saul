@@ -5,15 +5,14 @@
 let error_msg
 let load_stack = []
 
-if (isBrowser()) {
-  const loadstart = new CustomEvent('loadstart')
-  const loadend = new CustomEvent('loadend')
-  const loaderror = new CustomEvent('loaderror', {
-    detail: {
-      name: getErrorMsg()
-    }
-  })
-}
+// Load events can only be created is CustomEvent is available (ie. in a browser)
+const loadstart = typeof CustomEvent === 'object' ? new CustomEvent('loadstart') : null
+const loadend = typeof CustomEvent === 'object' ? new CustomEvent('loadend') : null
+const loaderror = typeof CustomEvent === 'object' ? new CustomEvent('loaderror', {
+  detail: {
+    name: getErrorMsg()
+  }
+}) : null
 
 
 /** Check if code is run in a Browser or Node enviroment */

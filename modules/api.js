@@ -5,58 +5,55 @@
 let error_msg
 let load_stack = []
 
-const loadstart = isBrowser() ? new CustomEvent('loadstart') : null
-const loadend = isBrowser() ? new CustomEvent('loadend') : null
-const loaderror = isBrowser() ? new CustomEvent('loaderror', {
-  detail: {
-    name: getErrorMsg()
-  }
-}) : null
+if (isBrowser()) {
+  const loadstart = new CustomEvent('loadstart')
+  const loadend = new CustomEvent('loadend')
+  const loaderror = new CustomEvent('loaderror', {
+    detail: {
+      name: getErrorMsg()
+    }
+  })
+}
 
+
+/** Check if code is run in a Browser or Node enviroment */
 function isBrowser() {
-  
   // Check if the environment is Node.js
   if (typeof process === "object" &&
-      typeof require === "function") {
-      return false;
+    typeof require === "function") {
+    return false
   }
-
   // Check if the environment is
   // a Service worker
   if (typeof importScripts === "function") {
-      return false;
+    return false
   }
-
   // Check if the environment is a Browser
   if (typeof window === "object") {
-      return true;
+    return true
   }
 }
 
 /** Sends 'loadstart' event if nothing else is currently loading */
 function startLoading() {
-  if (isBrowser()) {
-    if (load_stack.length < 1) {
-      document.dispatchEvent(loadstart)
-    }
-    load_stack.push(1)
+  if (isBrowser() && load_stack.length < 1) {
+    document.dispatchEvent(loadstart)
   }
+  load_stack.push(1)
 }
 
 /** Sends 'loadend' event if current loads have finished */
 function endLoading() {
-  if (isBrowser()) {
     load_stack.pop()
-    if (load_stack.length < 1) {
+    if (isBrowser() && load_stack.length < 1) {
       document.dispatchEvent(loadend)
     }
-  }
 }
 
 /** Sends 'loaderror' event and resets load status */
 function interruptLoading() {
+  load_stack = []
   if (isBrowser()) {
-    load_stack = []
     document.dispatchEvent(loaderror)
   }
 }

@@ -6,9 +6,9 @@ let error_msg
 let load_stack = []
 
 // Load events can only be created is CustomEvent is available (ie. in a browser)
-const loadstart = typeof CustomEvent === 'object' ? new CustomEvent('loadstart') : null
-const loadend = typeof CustomEvent === 'object' ? new CustomEvent('loadend') : null
-const loaderror = typeof CustomEvent === 'object' ? new CustomEvent('loaderror', {
+const loadstart = isBrowser() ? new CustomEvent('loadstart') : null
+const loadend = isBrowser() ? new CustomEvent('loadend') : null
+const loaderror = isBrowser() ? new CustomEvent('loaderror', {
   detail: {
     name: getErrorMsg()
   }

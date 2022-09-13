@@ -5,7 +5,7 @@
 let error_msg
 let load_stack = []
 
-// Load events can only be created is CustomEvent is available (ie. in a browser)
+// These custom events can only be created in a browser environment
 const loadstart = isBrowser() ? new CustomEvent('loadstart') : null
 const loadend = isBrowser() ? new CustomEvent('loadend') : null
 const loaderror = isBrowser() ? new CustomEvent('loaderror', {

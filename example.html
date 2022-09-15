@@ -21,7 +21,8 @@
       // Check config.js.example for info on how to set it up 
       import auth from './config.js'
       
-      import {getSTAC, image2world, world2image, getZ, iterate} from './index.js'
+      import {image2world, world2image, getZ, iterate} from './modules/saul-core.js'
+      import {getSTAC} from './modules/api.js'
 
       let xcoor = 579782.75
       let ycoor = 6131096.03

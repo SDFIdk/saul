@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo 'TESTS WILL ONLY RUN UNDER NODE v18' && node ./test/saul-projection.test.js && node ./test/saul-core.test.js",
-    "docs": "jsdoc ./modules/*.js --destination docs"
+    "test": "echo 'TESTS WILL ONLY RUN UNDER NODE v18' && node ./test/saul-projection.test.js && node ./test/saul-core.test.js && node ./test/saul-camera.test.js",
+    "docs": "jsdoc ./modules/ --destination docs"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,9 @@
     "jsdoc": "^3.6.10"
   },
   "dependencies": {
+    "fs": "^0.0.1-security",
+    "jpeg-js": "^0.4.4",
+    "opencv.js": "^1.2.1",
     "proj4": "^2.8.0"
   }
 }

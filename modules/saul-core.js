@@ -1,16 +1,16 @@
 /**
- * SAUL photogrammetry utilities 
+ * SAUL photogrammetry utilities
  */
- 
+
 import { getDHM } from './api.js'
 
-/** 
+/**
  * Converts x,y coordinates from an image to real world lat,lon coordinates
  * @param {object} image_data - skraafoto-stac-api image data
  * @param {number} col - Image x coordinate (from left to right). Should be a coordinate for the entire image, not just the part displayed in the viewport.
  * @param {number} row - Image y coordinate (from top to bottom). Should be a coordinate for the entire image, not just the part displayed in the viewport.
  * @param {number} [Z] - Elevation (geoide)
- * @returns {array} [longitude, latitude, elevation] 
+ * @returns {array} [longitude, latitude, elevation]
  */
 function image2world(image_data, col, row, Z = 0) {
 
@@ -32,7 +32,7 @@ function image2world(image_data, col, row, Z = 0) {
   var c = ci*(-1)
   var dimX = dimXi*pix/2*(-1)
   var dimY = dimYi*pix/2*(-1)
-  
+
   // ... Do calculations ...
   var o = radians(Ome)
   var p = radians(Phi)
@@ -59,13 +59,13 @@ function image2world(image_data, col, row, Z = 0) {
   return[X,Y,Z]
 }
 
-/** 
+/**
  * Converts lat,lon coordinates to x,y coordinates within a specific image
  * @param {Object} image_data - skraafoto-stac-api image data
  * @param {Number} Y - northing
  * @param {Number} X - easting
  * @param {Number} [Z] - elevation (geoide)
- * @returns {array} [x,y] Column/row image coordinate 
+ * @returns {array} [x,y] Column/row image coordinate
  */
 function world2image(image_data, X, Y, Z = 0) {
 
@@ -87,11 +87,12 @@ function world2image(image_data, X, Y, Z = 0) {
   var c = ci*(-1)
   var dimX = dimXi*pix/2*(-1)
   var dimY = dimYi*pix/2*(-1)
-  
+
   // ... Do calculations ...
   var o = radians(Ome)
   var p = radians(Phi)
   var k = radians(Kap)
+
   var D11 =   Math.cos(p) * Math.cos(k)
   var D12 = - Math.cos(p) * Math.sin(k)
   var D13 =   Math.sin(p)
@@ -116,12 +117,35 @@ function radians(degrees) {
   return degrees * (Math.PI / 180)
 }
 
-/** 
+/**
+ * translates on the z axis correctly on the oblique image
+ * @param {object} imageData pulled from STAC api
+ * @param {number} col image x coordinate
+ * @param {number} row image y coordinate
+ * @param {number} z_parameter how much to translate on z
+ * @returns {array}
+ */
+function translateImage_z(imageData, col, row, z_parameter) {
+  // translate the image coordinates to world coordinates
+  let worldCoords = image2world(imageData, col, row)
+  // console.log('world coords: ', worldCoords)
+
+  // extract the coordinates and add value to z
+  let x = worldCoords[0]
+  let y = worldCoords[1]
+  let new_z = worldCoords[2] + z_parameter
+
+  // translate back into image coordinates
+  let imageCoords = world2image(imageData, x, y, new_z)
+  return imageCoords
+}
+
+/**
  * Fetches elevation based on X,Y coordinates using DHM/Koter endpoint
  * @param {number} xcoor - EPSG:25832 X coordinate
  * @param {number} ycoor - EPSG:25832 Y coordinate
  * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
- * @returns {number} Elevation in meters 
+ * @returns {number} Elevation in meters
  */
 async function getZ(xcoor, ycoor, auth) {
   let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dsm`, auth)
@@ -143,10 +167,10 @@ function iterateRecursive(image_data, col, row, z, count, limit, auth, i) {
 
   // Get new z value from coordinates
   return getZ(worldcoor[0],worldcoor[1], auth).then((new_z) => {
-    
+
     // How big is the different between z and new z?
     const delta = Math.abs(new_z - z)
-    
+
     if (delta >= limit) {
       // If the difference is too big, try building coordinates with the new z
       count = count + 1
@@ -158,7 +182,7 @@ function iterateRecursive(image_data, col, row, z, count, limit, auth, i) {
   })
 }
 
-/** 
+/**
  * Tries to guess world coordinate for a pixel position within an image using STAC API image data and requests to DHM elevation data.
  * @param {object} image_data - image item data from STAC API
  * @param {number} col - image x coordinate (from left to right)
@@ -172,10 +196,10 @@ function iterate(image_data, col, row, auth, limit = 1) {
   return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth, i)
 }
 
-export { 
+export {
+  translateImage_z,
   image2world,
   world2image,
   getZ,
   iterate
 }
- 

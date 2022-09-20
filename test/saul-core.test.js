@@ -31,22 +31,26 @@ function is_equalIsh(num1, num2) {
   } else {
     return true
   }
-} 
+}
 
-// Test getZ
+/**
+ * Test getZ
+ */
 try {
 
   let elevation = await getZ(world_x, world_y, auth)
 
   assert(is_equalIsh(elevation, world_elevation), "getZ fail: This is not the Z value we were hoping for.")
-  
+
   console.log("Test getZ OK")
 
 } catch(error) {
   console.error(error)
 }
 
-// Test iterate
+/**
+ * Test iterate
+ */
 try {
 
   let ite = await iterate(item, image_x, image_y, auth, 0.05)
@@ -60,21 +64,25 @@ try {
   console.error(error)
 }
 
-// Test world2image
+/**
+ * Test world2image
+ */
 try {
 
   let xy = world2image(item, world_x, world_y, world_elevation)
 
   assert(is_equalIsh(xy[0], image_x), "world2image fail: The x coordinate values are not equal")
   assert(is_equalIsh(xy[1], image_y), "world2image fail: The y coordinate values are not equal")
-  
+
   console.log("Test world2image OK")
 
 } catch(error) {
   console.error(error)
 }
 
-// Test image2world
+/**
+ * Test image2world
+ */
 try {
 
   let coords = image2world(item, image_x, image_y, world_elevation)
@@ -88,7 +96,9 @@ try {
   console.error(error)
 }
 
-// Test world2image > image2world 
+/**
+ * Test world2image > image2world
+ */
 try {
 
   let xy1 = world2image(item, world_x, world_y, world_elevation)
@@ -103,7 +113,9 @@ try {
   console.error(error)
 }
 
-// Test world2image > iterate 
+/**
+ * Test world2image > iterate
+ */
 try {
 
   let xy2 = world2image(item, world_x, world_y, world_elevation)

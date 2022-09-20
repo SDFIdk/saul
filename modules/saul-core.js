@@ -17,6 +17,10 @@ function image2world(image_data, col, row, Z = 0) {
   // constants pulled from image_data
   const xx0  = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
   const yy0  = image_data.properties['pers:interior_orientation'].principal_point_offset[1]
+
+  // test variables from Andrew. Delete when done.
+  // const xx0  = -0.036
+  // const yy0  = 6.77
   const ci   = image_data.properties['pers:interior_orientation'].focal_length
   const pix  = image_data.properties['pers:interior_orientation'].pixel_spacing[0]
   const dimXi = image_data.properties['pers:interior_orientation'].sensor_array_dimensions[0]

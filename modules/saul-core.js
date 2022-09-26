@@ -124,7 +124,7 @@ function radians(degrees) {
  * @returns {number} Elevation in meters 
  */
 async function getZ(xcoor, ycoor, auth) {
-  let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dsm`, auth)
+  let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dtm`, auth)
   let z = zcoor_data.HentKoterRespons.data[0].kote
   return z
 }

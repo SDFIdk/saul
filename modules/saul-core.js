@@ -4,59 +4,120 @@
  
 import { getDHM } from './api.js'
 
+/** Gathers elevation range extremes from terrain data */
+function getZrange(terrain_data) {
+  let sorted_data = terrain_data.sort(function(a,b) {
+    if (a.kote > b.kote) {
+      return -1
+    } else if (b.kote > a.kote) {
+      return 1
+    } else {
+      return 0
+    }
+  })
+  let min = sorted_data[ sorted_data.length -1 ].kote
+  let mid = sorted_data[ sorted_data.length / 2 ].kote
+  let max = sorted_data[0].kote
+  return [min, mid, max]
+}
+
+/** Finds elevation closest to a given coordinate */
+function findClosestZ(coordinate, terrain_data) {
+  
+  let distance_x = Math.abs(terrain_data[0].geop[0] - coordinate[0])
+  let distance_y = Math.abs(terrain_data[0].geop[1] - coordinate[1])
+  let closest = terrain_data[0]
+
+  terrain_data.forEach(function(t) {
+    let dist_x = Math.abs(t.geop[0] - coordinate[0])
+    let dist_y = Math.abs(t.geop[1] - coordinate[1])
+    if (dist_x <= distance_x && dist_y <= distance_y) {
+      distance_x = dist_x
+      distance_y = dist_y
+      closest = t
+    }
+  })
+
+  return closest
+}
+
 /** 
- * Converts x,y coordinates from an image to real world lat,lon coordinates
+ * Converts x,y coordinates from an image to real world latitude, longitude, and elevation coordinates
  * @param {object} image_data - skraafoto-stac-api image data
  * @param {number} col - Image x coordinate (from left to right). Should be a coordinate for the entire image, not just the part displayed in the viewport.
  * @param {number} row - Image y coordinate (from top to bottom). Should be a coordinate for the entire image, not just the part displayed in the viewport.
- * @param {number} [Z] - Elevation (geoide)
- * @returns {array} [longitude, latitude, elevation] 
+ * @param {object} terrain_data - Output from `getTerrain()` method. DHM Elevation data covering the image's bounding box.
+ * @returns {array} [longitude, latitude, elevation]
  */
-function image2world(image_data, col, row, Z = 0) {
+function image2world(image_data, col, row, terrain_data) {
 
   // constants pulled from image_data
-  const xx0  = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
-  const yy0  = image_data.properties['pers:interior_orientation'].principal_point_offset[1]
-  const ci   = image_data.properties['pers:interior_orientation'].focal_length
-  const pix  = image_data.properties['pers:interior_orientation'].pixel_spacing[0]
+  const xx0   = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
+  const yy0   = image_data.properties['pers:interior_orientation'].principal_point_offset[1]
+  const ci    = image_data.properties['pers:interior_orientation'].focal_length
+  const pix   = image_data.properties['pers:interior_orientation'].pixel_spacing[0]
   const dimXi = image_data.properties['pers:interior_orientation'].sensor_array_dimensions[0]
   const dimYi = image_data.properties['pers:interior_orientation'].sensor_array_dimensions[1]
-  const X0   = image_data.properties['pers:perspective_center'][0]
-  const Y0   = image_data.properties['pers:perspective_center'][1]
-  const Z0   = image_data.properties['pers:perspective_center'][2]
-  const Ome  = image_data.properties['pers:omega']
-  const Phi  = image_data.properties['pers:phi']
-  const Kap  = image_data.properties['pers:kappa']
+  const X0    = image_data.properties['pers:perspective_center'][0]
+  const Y0    = image_data.properties['pers:perspective_center'][1]
+  const Z0    = image_data.properties['pers:perspective_center'][2]
+  const Ome   = image_data.properties['pers:omega']
+  const Phi   = image_data.properties['pers:phi']
+  const Kap   = image_data.properties['pers:kappa']
+
+  // Terrain values
+  const Z_range = getZrange(terrain_data)
+  let Z = Z_range[1]
 
   // recalc values
-  var c = ci*(-1)
-  var dimX = dimXi*pix/2*(-1)
-  var dimY = dimYi*pix/2*(-1)
+  const c = ci*(-1)
+  const dimX = dimXi*pix/2*(-1)
+  const dimY = dimYi*pix/2*(-1)
   
   // ... Do calculations ...
-  var o = radians(Ome)
-  var p = radians(Phi)
-  var k = radians(Kap)
-  var D11 =   Math.cos(p) * Math.cos(k)
-  var D12 = - Math.cos(p) * Math.sin(k)
-  var D13 =   Math.sin(p)
-  var D21 =   Math.cos(o) * Math.sin(k) + Math.sin(o) * Math.sin(p) * Math.cos(k)
-  var D22 =   Math.cos(o) * Math.cos(k) - Math.sin(o) * Math.sin(p) * Math.sin(k)
-  var D23 = - Math.sin(o) * Math.cos(p)
-  var D31 =   Math.sin(o) * Math.sin(k) - Math.cos(o) * Math.sin(p) * Math.cos(k)
-  var D32 =   Math.sin(o) * Math.cos(k) + Math.cos(o) * Math.sin(p) * Math.sin(k)
-  var D33 =   Math.cos(o) * Math.cos(p)
+  const o = radians(Ome)
+  const p = radians(Phi)
+  const k = radians(Kap)
+  const D11 =   Math.cos(p) * Math.cos(k)
+  const D12 = - Math.cos(p) * Math.sin(k)
+  const D13 =   Math.sin(p)
+  const D21 =   Math.cos(o) * Math.sin(k) + Math.sin(o) * Math.sin(p) * Math.cos(k)
+  const D22 =   Math.cos(o) * Math.cos(k) - Math.sin(o) * Math.sin(p) * Math.sin(k)
+  const D23 = - Math.sin(o) * Math.cos(p)
+  const D31 =   Math.sin(o) * Math.sin(k) - Math.cos(o) * Math.sin(p) * Math.cos(k)
+  const D32 =   Math.sin(o) * Math.cos(k) + Math.cos(o) * Math.sin(p) * Math.sin(k)
+  const D33 =   Math.cos(o) * Math.cos(p)
 
-  var x_dot = ((col*pix)-dimX*-1)-xx0
-  var y_dot = ((row*pix)-dimY*-1)-yy0
+  const x_dot = ((col*pix)-dimX*-1)-xx0
+  const y_dot = ((row*pix)-dimY*-1)-yy0
 
-  var kx = (D11*x_dot + D12*y_dot + D13*c)/(D31*x_dot + D32*y_dot + D33*c)
-  var ky = (D21*x_dot + D22*y_dot + D23*c)/(D31*x_dot + D32*y_dot + D33*c)
+  const kx = (D11*x_dot + D12*y_dot + D13*c)/(D31*x_dot + D32*y_dot + D33*c)
+  const ky = (D21*x_dot + D22*y_dot + D23*c)/(D31*x_dot + D32*y_dot + D33*c)
 
-  var X = (Z-Z0)*kx + X0
-  var Y = (Z-Z0)*ky + Y0
+  let world_x = (Z-Z0)*kx + X0
+  let world_y = (Z-Z0)*ky + Y0
 
-  return[X,Y,Z]
+  // Now that we have a guess at world XY, try to get a better Z (elevation) using terrain data
+  //Z = findClosestZ([world_x, world_y], terrain_data).kote
+
+  console.log('got col,row', col, row)
+
+  // Calculate XY, compare, and calculate again
+  function iterate(elevation) {
+    
+    console.log('new xyz', world_x, world_y, elevation)
+    const img_coord_now = world2image(image_data, world_x, world_y, elevation)
+    console.log('image_coord_now', img_coord_now)
+    if (img_coord_now[0] === row && img_coord_now[1] === col) {
+      console.log('everything aligns')
+      return [world_x, world_y, elevation]
+    } else {
+      console.log('something is rotten')
+      return [world_x, world_y, elevation]
+    }
+  }
+
+  return iterate(Z)
 }
 
 /** 
@@ -70,45 +131,65 @@ function image2world(image_data, col, row, Z = 0) {
 function world2image(image_data, X, Y, Z = 0) {
 
   // constants pulled from image_data
-  const xx0  = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
-  const yy0  = image_data.properties['pers:interior_orientation'].principal_point_offset[1]
-  const ci   = image_data.properties['pers:interior_orientation'].focal_length
-  const pix  = image_data.properties['pers:interior_orientation'].pixel_spacing[0]
+  const xx0   = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
+  const yy0   = image_data.properties['pers:interior_orientation'].principal_point_offset[1]
+  const ci    = image_data.properties['pers:interior_orientation'].focal_length
+  const pix   = image_data.properties['pers:interior_orientation'].pixel_spacing[0]
   const dimXi = image_data.properties['pers:interior_orientation'].sensor_array_dimensions[0]
   const dimYi = image_data.properties['pers:interior_orientation'].sensor_array_dimensions[1]
-  const X0   = image_data.properties['pers:perspective_center'][0]
-  const Y0   = image_data.properties['pers:perspective_center'][1]
-  const Z0   = image_data.properties['pers:perspective_center'][2]
-  const Ome  = image_data.properties['pers:omega']
-  const Phi  = image_data.properties['pers:phi']
-  const Kap  = image_data.properties['pers:kappa']
+  const X0    = image_data.properties['pers:perspective_center'][0]
+  const Y0    = image_data.properties['pers:perspective_center'][1]
+  const Z0    = image_data.properties['pers:perspective_center'][2]
+  const Ome   = image_data.properties['pers:omega']
+  const Phi   = image_data.properties['pers:phi']
+  const Kap   = image_data.properties['pers:kappa']
 
   // recalc values
-  var c = ci*(-1)
-  var dimX = dimXi*pix/2*(-1)
-  var dimY = dimYi*pix/2*(-1)
+  const c = ci*(-1)
+  const dimX = dimXi*pix/2*(-1)
+  const dimY = dimYi*pix/2*(-1)
   
   // ... Do calculations ...
-  var o = radians(Ome)
-  var p = radians(Phi)
-  var k = radians(Kap)
-  var D11 =   Math.cos(p) * Math.cos(k)
-  var D12 = - Math.cos(p) * Math.sin(k)
-  var D13 =   Math.sin(p)
-  var D21 =   Math.cos(o) * Math.sin(k) + Math.sin(o) * Math.sin(p) * Math.cos(k)
-  var D22 =   Math.cos(o) * Math.cos(k) - Math.sin(o) * Math.sin(p) * Math.sin(k)
-  var D23 = - Math.sin(o) * Math.cos(p)
-  var D31 =   Math.sin(o) * Math.sin(k) - Math.cos(o) * Math.sin(p) * Math.cos(k)
-  var D32 =   Math.sin(o) * Math.cos(k) + Math.cos(o) * Math.sin(p) * Math.sin(k)
-  var D33 =   Math.cos(o) * Math.cos(p)
+  const o = radians(Ome)
+  const p = radians(Phi)
+  const k = radians(Kap)
+  const D11 =   Math.cos(p) * Math.cos(k)
+  const D12 = - Math.cos(p) * Math.sin(k)
+  const D13 =   Math.sin(p)
+  const D21 =   Math.cos(o) * Math.sin(k) + Math.sin(o) * Math.sin(p) * Math.cos(k)
+  const D22 =   Math.cos(o) * Math.cos(k) - Math.sin(o) * Math.sin(p) * Math.sin(k)
+  const D23 = - Math.sin(o) * Math.cos(p)
+  const D31 =   Math.sin(o) * Math.sin(k) - Math.cos(o) * Math.sin(p) * Math.cos(k)
+  const D32 =   Math.sin(o) * Math.cos(k) + Math.cos(o) * Math.sin(p) * Math.sin(k)
+  const D33 =   Math.cos(o) * Math.cos(p)
 
-  var x_dot = (-1)*c*((D11*(X-X0)+D21*(Y-Y0)+D31*(Z-Z0))/(D13*(X-X0)+D23*(Y-Y0)+D33*(Z-Z0)))
-  var y_dot = (-1)*c*((D12*(X-X0)+D22*(Y-Y0)+D32*(Z-Z0))/(D13*(X-X0)+D23*(Y-Y0)+D33*(Z-Z0)))
+  const x_dot = (-1)*c*((D11*(X-X0)+D21*(Y-Y0)+D31*(Z-Z0))/(D13*(X-X0)+D23*(Y-Y0)+D33*(Z-Z0)))
+  const y_dot = (-1)*c*((D12*(X-X0)+D22*(Y-Y0)+D32*(Z-Z0))/(D13*(X-X0)+D23*(Y-Y0)+D33*(Z-Z0)))
 
-  var col = ((x_dot-xx0)+(dimX))*(-1)/pix
-  var row = ((y_dot-yy0)+(dimY))*(-1)/pix
+  const col = ((x_dot-xx0)+(dimX))*(-1)/pix
+  const row = ((y_dot-yy0)+(dimY))*(-1)/pix
 
   return [col, row]
+}
+
+/**
+ * Calculates horizontal distance between to points in an image
+ * @param {[x,y]} image_coor_1 - Image [x,y] 'from' measure
+ * @param {[x,y]} image_coor_2 - Image [x,y] 'to' measure
+ * @returns {number} Distance in meters
+ */
+function getHorizontalDistance(image_coor_1, image_coor_2) {
+  return true
+}
+
+/**
+ * Calculates vertical distance between to points in an image
+ * @param {[x,y]} image_coor_1 - Image [x,y] 'from' measure
+ * @param {[x,y]} image_coor_2 - Image [x,y] 'to' measure
+ * @returns {number} Distance in meters
+ */
+function getVerticalDistance(image_coor_1, image_coor_2) {
+  return true
 }
 
 /** Converts degress to radians */
@@ -118,8 +199,8 @@ function radians(degrees) {
 
 /** 
  * Fetches elevation based on X,Y coordinates using DHM/Koter endpoint
- * @param {number} xcoor - EPSG:25832 X coordinate
- * @param {number} ycoor - EPSG:25832 Y coordinate
+ * @param {number} xcoor - EPSG:25832 easting coordinate
+ * @param {number} ycoor - EPSG:25832 northing coordinate
  * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
  * @returns {number} Elevation in meters 
  */
@@ -175,6 +256,8 @@ function iterate(image_data, col, row, auth, limit = 1) {
 export { 
   image2world,
   world2image,
+  getHorizontalDistance,
+  getVerticalDistance,
   getZ,
   iterate
 }

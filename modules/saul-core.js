@@ -45,11 +45,15 @@ function findClosestZ(coordinate, terrain_data) {
  * Converts x,y coordinates from an image to real world latitude, longitude, and elevation coordinates
  * @param {object} image_data - skraafoto-stac-api image data
  * @param {number} col - Image x coordinate (from left to right). Should be a coordinate for the entire image, not just the part displayed in the viewport.
- * @param {number} row - Image y coordinate (from top to bottom). Should be a coordinate for the entire image, not just the part displayed in the viewport.
+ * @param {number} row - Image y coordinate (from bottom to top). Should be a coordinate for the entire image, not just the part displayed in the viewport.
  * @param {object} terrain_data - Output from `getTerrain()` method. DHM Elevation data covering the image's bounding box.
- * @returns {array} [longitude, latitude, elevation]
+ * @returns {array} [longitude, latitude, elevation] Elevation is in meters. Lon/lat are EPSG:25832 coordinates.
  */
 function image2world(image_data, col, row, terrain_data) {
+
+  // Terrain values
+  const Z_range = getZrange(terrain_data)
+  let Z = Z_range[1]
 
   // constants pulled from image_data
   const xx0   = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
@@ -64,10 +68,6 @@ function image2world(image_data, col, row, terrain_data) {
   const Ome   = image_data.properties['pers:omega']
   const Phi   = image_data.properties['pers:phi']
   const Kap   = image_data.properties['pers:kappa']
-
-  // Terrain values
-  const Z_range = getZrange(terrain_data)
-  let Z = Z_range[1]
 
   // recalc values
   const c = ci*(-1)
@@ -97,22 +97,21 @@ function image2world(image_data, col, row, terrain_data) {
   let world_x = (Z-Z0)*kx + X0
   let world_y = (Z-Z0)*ky + Y0
 
+  // TODO: This somehow makes it worse
   // Now that we have a guess at world XY, try to get a better Z (elevation) using terrain data
-  //Z = findClosestZ([world_x, world_y], terrain_data).kote
+  // Z = findClosestZ([world_x, world_y], terrain_data).kote
 
-  console.log('got col,row', col, row)
-
-  // Calculate XY, compare, and calculate again
+  // Compare XY and calculate again if necessary
   function iterate(elevation) {
     
-    console.log('new xyz', world_x, world_y, elevation)
     const img_coord_now = world2image(image_data, world_x, world_y, elevation)
-    console.log('image_coord_now', img_coord_now)
-    if (img_coord_now[0] === row && img_coord_now[1] === col) {
-      console.log('everything aligns')
+    
+    if (checkDeviation(img_coord_now[0],col) && checkDeviation(img_coord_now[1], row)) {
       return [world_x, world_y, elevation]
     } else {
-      console.log('something is rotten')
+      console.log('Something is rotten within image2world method.') 
+      console.log('See', img_coord_now, 'compared to', col, row)
+      console.log('We should recalc world_x/world_y using a different elevation and try again')
       return [world_x, world_y, elevation]
     }
   }
@@ -123,9 +122,9 @@ function image2world(image_data, col, row, terrain_data) {
 /** 
  * Converts lat,lon coordinates to x,y coordinates within a specific image
  * @param {Object} image_data - skraafoto-stac-api image data
- * @param {Number} Y - northing
- * @param {Number} X - easting
- * @param {Number} [Z] - elevation (geoide)
+ * @param {Number} Y - EPSG:25832 northing coordinate
+ * @param {Number} X - EPSG:25832 easting coordinate
+ * @param {Number} [Z] - elevation in meters (geoide)
  * @returns {array} [x,y] Column/row image coordinate 
  */
 function world2image(image_data, X, Y, Z = 0) {
@@ -169,7 +168,7 @@ function world2image(image_data, X, Y, Z = 0) {
   const col = ((x_dot-xx0)+(dimX))*(-1)/pix
   const row = ((y_dot-yy0)+(dimY))*(-1)/pix
 
-  return [col, row]
+  return [Math.round(col), Math.round(row)]
 }
 
 /**
@@ -210,47 +209,19 @@ async function getZ(xcoor, ycoor, auth) {
   return z
 }
 
-/** Iterates guessing at a world coordinate using image coordinates and elevation info */
-function iterateRecursive(image_data, col, row, z, count, limit, auth, i) {
-
-  // Get coordinates based on current z value
-  const worldcoor = image2world(image_data,col,row,z)
-
-  i--
-  if (i <= 0) {
-    // max iterations reached
-    return [worldcoor, 0, count]
-  }
-
-  // Get new z value from coordinates
-  return getZ(worldcoor[0],worldcoor[1], auth).then((new_z) => {
-    
-    // How big is the different between z and new z?
-    const delta = Math.abs(new_z - z)
-    
-    if (delta >= limit) {
-      // If the difference is too big, try building coordinates with the new z
-      count = count + 1
-      return iterateRecursive(image_data, col, row, new_z, count, limit, auth, i)
-    } else {
-      // If the difference is small, return coordinates
-      return [worldcoor, delta, count]
-    }
-  })
-}
-
-/** 
- * Tries to guess world coordinate for a pixel position within an image using STAC API image data and requests to DHM elevation data.
- * @param {object} image_data - image item data from STAC API
- * @param {number} col - image x coordinate (from left to right)
- * @param {number} row - image y coordinate (from top to bottom)
- * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
- * @param {number} [limit] - result may be inaccurate within this limit. Default is 1.
- * @returns {array} [world coordindates (array), elevation discrepancy, calculation iterations]
+/**
+ * Checks whether two numbers are equal enough within a given limit
+ * @param {number} num1 - First number to check
+ * @param {number} num2 - Second number to check
+ * @param {number} [deviation] - The numbers may be off by this amount. Default is 0.5
+ * @returns {boolean} `true` if numbers are approximately equal
  */
-function iterate(image_data, col, row, auth, limit = 1) {
-  let i = 20 // Maximum number of iterations allowed
-  return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth, i)
+function checkDeviation(num1, num2, deviation = 0.5) {
+  if (Math.abs(num1 - num2) >= deviation) {
+    return false
+  } else {
+    return true
+  }
 }
 
 export { 
@@ -258,7 +229,6 @@ export {
   world2image,
   getHorizontalDistance,
   getVerticalDistance,
-  getZ,
-  iterate
+  getZ
 }
  

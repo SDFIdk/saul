@@ -5,16 +5,15 @@ export {
   world2image,
   getHorizontalDistance,
   getVerticalDistance,
-  getZ,
-  iterate
+  getZ
 } from './modules/saul-core.js'
 
 export {
   postSTAC,
   getSTAC,
-  getDHM,
   get,
   post,
+  getDHM,
   getTerrain
 } from './modules/api.js'
 

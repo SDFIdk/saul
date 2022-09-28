@@ -14,7 +14,7 @@ const world_x = 587762.602
 const world_y = 6133610.917
 const image_x = 7373
 const image_y = 3205
-const world_elevation = 31.018944
+const world_elevation = 31.019
 
 function is_equalIsh(num1, num2, deviation = 0.03) {
   if (Math.abs(num1 - num2) >= deviation) {

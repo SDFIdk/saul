@@ -16,7 +16,7 @@ function getZrange(terrain_data) {
     }
   })
   let min = sorted_data[ sorted_data.length -1 ].kote
-  let mid = sorted_data[ sorted_data.length / 2 ].kote
+  let mid = sorted_data[ Math.round( sorted_data.length / 2 ) ].kote
   let max = sorted_data[0].kote
   return [min, mid, max]
 }

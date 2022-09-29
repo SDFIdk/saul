@@ -227,14 +227,40 @@ function getVerticalDistance(image_coor_1, image_coor_2) {
   return true
 }
 
-/** Converts degress to radians */
+/** 
+ * Converts degress to radians 
+ */
 function radians(degrees) {
   return degrees * (Math.PI / 180)
+}
+
+/**
+ * Create a function to adjust a Line of points along a skewed axis depending
+ * @param {[x,y]} coord
+ * @param {object} image_item
+ * @returns {object} Returns a function that takes 2 image coordinates and returns the 2nd coordinate with Y axis skew adjusted
+ */
+function generateHeightAxisFunction(coord, image_item) {
+  const world0 = image2world(image_item, coord[0], coord[1], 0)
+  const world1 = image2world(image_item, coord[0], coord[1], 10)
+  const image0 = world2image(image_item, world0[0], world0[1])
+  const image1 = world2image(image_item, world1[0], world1[1])
+  const skew_factor = [(image1[0] - image0[0])/10, (image1[1] - image0[1])/10]
+  
+  return function(image_coor_1, image_coor_2) {
+    const s = skew_factor
+    const delta_y = image_coor_2[1] - image_coor_1[1]
+    const ratio_y = delta_y / s[1]
+    const delta_x = ratio_y * s[0] // We assume x and y ratios are equal
+    const x = image_coor_1[0] + delta_x
+    return [x, image_coor_2[1], Math.abs(ratio_y).toFixed(1)]
+  }
 }
 
 export { 
   image2world,
   world2image,
+  generateHeightAxisFunction,
   getHorizontalDistance,
   getVerticalDistance
 }

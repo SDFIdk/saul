@@ -3,6 +3,7 @@
 export {
   image2world,
   world2image,
+  generateHeightAxisFunction,
   getHorizontalDistance,
   getVerticalDistance
 } from './modules/saul-core.js'

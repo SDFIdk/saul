@@ -5,8 +5,9 @@
 import auth from '../config.js'
 
 import assert from 'assert'
-import { getTerrain, getSTAC } from '../modules/api.js'
+import { getSTAC } from '../modules/api.js'
 import { image2world, world2image } from '../modules/saul-core.js'
+import { getTerrain } from '../modules/saul-terrain.js'
 
 const item = await getSTAC('/collections/skraafotos2021/items/2021_83_36_2_0015_00003591?crs=http://www.opengis.net/def/crs/EPSG/0/25832', auth)
 const image_x = 5000

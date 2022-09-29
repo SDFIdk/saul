@@ -2,24 +2,7 @@
  * SAUL photogrammetry utilities 
  */
  
-import { getDHM } from './api.js'
-
-/** Gathers elevation range extremes from terrain data */
-function getZrange(terrain_data) {
-  let sorted_data = terrain_data.sort(function(a,b) {
-    if (a.kote > b.kote) {
-      return -1
-    } else if (b.kote > a.kote) {
-      return 1
-    } else {
-      return 0
-    }
-  })
-  let min = sorted_data[ sorted_data.length -1 ].kote
-  let max = sorted_data[0].kote
-  let mid = (min + max) / 2
-  return [min, mid, max]
-}
+import { getZrange } from './saul-terrain.js'
 
 /** 
  * Converts x,y coordinates from an image to real world latitude, longitude, and elevation coordinates
@@ -160,57 +143,10 @@ function radians(degrees) {
   return degrees * (Math.PI / 180)
 }
 
-/** 
- * Fetches elevation based on X,Y coordinates using DHM/Koter endpoint
- * @param {number} xcoor - EPSG:25832 easting coordinate
- * @param {number} ycoor - EPSG:25832 northing coordinate
- * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
- * @returns {number} Elevation in meters 
- */
-async function getZ(xcoor, ycoor, auth) {
-  let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dtm`, auth)
-  let z = zcoor_data.HentKoterRespons.data[0].kote
-  return z
-}
-
-/** 
- * Compare XY and calculate again if necessary
- */ 
-function refineWorldCoord(image_data, world_coord, img_coord, elevation) {
-  
-  const img_coord_now = world2image(image_data, world_coord[0], world_coord[1])
-  console.log('checking world coord', world_coord, img_coord, img_coord_now, elevation)
-
-  if (checkDeviation(img_coord_now[0], img_coord[0]) && checkDeviation(img_coord_now[1], img_coord[1])) {
-    return [world_coord[0], world_coord[1], elevation]
-  } else {
-    console.log('Something is rotten within image2world method.') 
-    console.log('See', img_coord_now, 'compared to', img_coord)
-    console.log('We should recalc world_x/world_y using a different elevation and try again')
-    return [world_coord[0], world_coord[1], elevation]
-  }
-}
-
-/**
- * Checks whether two numbers are equal enough within a given limit
- * @param {number} num1 - First number to check
- * @param {number} num2 - Second number to check
- * @param {number} [deviation] - The numbers may be off by this amount. Default is 0.5
- * @returns {boolean} `true` if numbers are approximately equal
- */
-function checkDeviation(num1, num2, deviation = 0.3) {
-  if (Math.abs(num1 - num2) >= deviation) {
-    return false
-  } else {
-    return true
-  }
-}
-
 export { 
   image2world,
   world2image,
   getHorizontalDistance,
-  getVerticalDistance,
-  getZ
+  getVerticalDistance
 }
  

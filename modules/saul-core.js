@@ -4,6 +4,90 @@
  
 import { getZrange } from './saul-terrain.js'
 
+/**
+ * Finds a set of terrain data that is closest to `geop` coordinate
+ * @param {array} terrain - Terrain data from DHM response
+ * @param {array} geop - EPSG:25832 coordinate [x,y]
+ * @returns {array} [x,y,z]
+ */
+function getClosestTerrain(terrain, geop) {
+
+  let t = [0,0,0]
+  let delta_x 
+  let delta_y
+  
+  terrain.forEach(function(obj) {
+    const new_delta_x = Number(obj.geop[0]) - geop[0]
+    if (!delta_x) {
+      delta_x = new_delta_x
+      t[0] = obj.geop[0]
+    } else if (new_delta_x <= delta_x) {
+      delta_x = new_delta_x
+      t[0] = obj.geop[0]
+      if (delta_x < delta_y) {
+        t[2] = obj.kote
+      }
+    }
+    const new_delta_y = Number(obj.geop[1]) - geop[1]
+    if (!delta_y) {
+      delta_y = new_delta_y
+      t[1] = obj.geop[1]
+    } else if (new_delta_y <= delta_y) {
+      delta_y = new_delta_y
+      t[1] = obj.geop[1]
+      if (delta_y < delta_x) {
+        t[2] = obj.kote
+      }
+    }
+  })
+
+  return t
+}
+
+function refineWorldCoord(options) {
+  
+  // TODO:
+  // This method finds the closest terrain datapoint [xyz] for a given XY
+  // On subsequent iterations with a slightly altereed XY, 
+  // the closest terrain datapoint is usually the same,
+  // making this method pretty unusable
+
+  // It might be more fruitful to compare output from world2image with the current image_xy
+
+  const new_geop = getClosestTerrain(options.terrain, options.world_xy)
+  const delta_z = options.elevation - new_geop[2]
+  let new_world_x
+  let new_world_y
+
+  console.log('delta', delta_z, 'from', new_geop)
+
+  if (delta_z === 0) {
+
+    return [options.world_xy[0], options.world_xy[1], options.elevation]
+
+  } else {
+    if (options.world_xy[0] > new_geop[0]) {
+      new_world_x = options.world_xy[0] + 0.02
+    } else if (options.world_xy[0] < new_geop[0]) {
+      new_world_x = options.world_xy[0] - 0.02
+    }
+    if (options.world_xy[1] > new_geop[1]) {
+      new_world_y = options.world_xy[1] + 0.02
+    } else if (options.world_xy[1] < new_geop[1]) {
+      new_world_y = options.world_xy[1] - 0.02
+    }
+  }
+
+  console.log('old xyz', options.world_xy, options.elevation)
+  console.log('new xyz', new_world_x, new_world_y, new_geop[2])
+  console.log('image xy', options.image_xy)
+  console.log('world2image', world2image(options.item, new_world_x, new_world_y, new_geop[2]))
+
+  options.world_xy = [new_world_x, new_world_y]
+  options.elevation = new_geop[2]
+  return refineWorldCoord(options)
+}
+
 /** 
  * Converts x,y coordinates from an image to real world latitude, longitude, and elevation coordinates
  * @param {object} image_data - skraafoto-stac-api image data
@@ -57,13 +141,18 @@ function image2world(image_data, col, row, terrain_data) {
   const kx = (D11*x_dot + D12*y_dot + D13*c)/(D31*x_dot + D32*y_dot + D33*c)
   const ky = (D21*x_dot + D22*y_dot + D23*c)/(D31*x_dot + D32*y_dot + D33*c)
 
-  let world_x = (Z-Z0)*kx + X0
-  let world_y = (Z-Z0)*ky + Y0
+  const world_x = (Z-Z0)*kx + X0
+  const world_y = (Z-Z0)*ky + Y0
 
-  // TODO: We might not need this
-  //const world_coord = refineWorldCoord(image_data, [world_x, world_y], [col, row], Z)
-
-  return [world_x, world_y, Z]
+  const world_xyz = refineWorldCoord({
+    item: image_data,
+    terrain: terrain_data,
+    world_xy: [world_x, world_y], 
+    image_xy: [col,row],
+    elevation: Z
+  })
+  
+  return world_xyz
 }
 
 /** 

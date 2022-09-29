@@ -17,24 +17,6 @@ import { get } from './api.js'
   return z
 }
 
-/** 
- * Compare XY and calculate again if necessary
- */ 
-function refineWorldCoord(image_data, world_coord, img_coord, elevation) {
-  
-  const img_coord_now = world2image(image_data, world_coord[0], world_coord[1])
-  console.log('checking world coord', world_coord, img_coord, img_coord_now, elevation)
-
-  if (checkDeviation(img_coord_now[0], img_coord[0]) && checkDeviation(img_coord_now[1], img_coord[1])) {
-    return [world_coord[0], world_coord[1], elevation]
-  } else {
-    console.log('Something is rotten within image2world method.') 
-    console.log('See', img_coord_now, 'compared to', img_coord)
-    console.log('We should recalc world_x/world_y using a different elevation and try again')
-    return [world_coord[0], world_coord[1], elevation]
-  }
-}
-
 /** Gathers elevation range extremes from terrain data */
 function getZrange(terrain_data) {
   let sorted_data = terrain_data.sort(function(a,b) {

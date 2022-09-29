@@ -76,9 +76,13 @@ try {
   console.log("Testing world2image")
 
   const xy1 = world2image(item1, world_x, world_y, world_elevation)
+  const xy2 = world2image(item2, world_x, world_y, world_elevation)
   
   assert(is_equalIsh(xy1[0], image_x_1, 0.5), "world2image fail: The x coordinate values are not equal")
   assert(is_equalIsh(xy1[1], image_y_1, 0.5), "world2image fail: The y coordinate values are not equal")
+
+  assert(is_equalIsh(xy2[0], image_x_2, 0.5), "world2image fail: The x coordinate values are not equal")
+  assert(is_equalIsh(xy2[1], image_y_2, 0.5), "world2image fail: The y coordinate values are not equal")
 
   console.log("OK within 0.5px")
   console.log("===================")

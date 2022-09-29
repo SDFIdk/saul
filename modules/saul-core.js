@@ -16,29 +16,9 @@ function getZrange(terrain_data) {
     }
   })
   let min = sorted_data[ sorted_data.length -1 ].kote
-  let mid = sorted_data[ Math.round( sorted_data.length / 2 ) ].kote
   let max = sorted_data[0].kote
+  let mid = (min + max) / 2
   return [min, mid, max]
-}
-
-/** Finds elevation closest to a given coordinate */
-function findClosestZ(coordinate, terrain_data) {
-  
-  let distance_x = Math.abs(terrain_data[0].geop[0] - coordinate[0])
-  let distance_y = Math.abs(terrain_data[0].geop[1] - coordinate[1])
-  let closest = terrain_data[0]
-
-  terrain_data.forEach(function(t) {
-    let dist_x = Math.abs(t.geop[0] - coordinate[0])
-    let dist_y = Math.abs(t.geop[1] - coordinate[1])
-    if (dist_x <= distance_x && dist_y <= distance_y) {
-      distance_x = dist_x
-      distance_y = dist_y
-      closest = t
-    }
-  })
-
-  return closest
 }
 
 /** 
@@ -97,26 +77,10 @@ function image2world(image_data, col, row, terrain_data) {
   let world_x = (Z-Z0)*kx + X0
   let world_y = (Z-Z0)*ky + Y0
 
-  // TODO: This somehow makes it worse
-  // Now that we have a guess at world XY, try to get a better Z (elevation) using terrain data
-  // Z = findClosestZ([world_x, world_y], terrain_data).kote
+  // TODO: We might not need this
+  //const world_coord = refineWorldCoord(image_data, [world_x, world_y], [col, row], Z)
 
-  // Compare XY and calculate again if necessary
-  function iterate(elevation) {
-    
-    const img_coord_now = world2image(image_data, world_x, world_y, elevation)
-    
-    if (checkDeviation(img_coord_now[0],col) && checkDeviation(img_coord_now[1], row)) {
-      return [world_x, world_y, elevation]
-    } else {
-      console.log('Something is rotten within image2world method.') 
-      console.log('See', img_coord_now, 'compared to', col, row)
-      console.log('We should recalc world_x/world_y using a different elevation and try again')
-      return [world_x, world_y, elevation]
-    }
-  }
-
-  return iterate(Z)
+  return [world_x, world_y, Z]
 }
 
 /** 
@@ -209,6 +173,24 @@ async function getZ(xcoor, ycoor, auth) {
   return z
 }
 
+/** 
+ * Compare XY and calculate again if necessary
+ */ 
+function refineWorldCoord(image_data, world_coord, img_coord, elevation) {
+  
+  const img_coord_now = world2image(image_data, world_coord[0], world_coord[1])
+  console.log('checking world coord', world_coord, img_coord, img_coord_now, elevation)
+
+  if (checkDeviation(img_coord_now[0], img_coord[0]) && checkDeviation(img_coord_now[1], img_coord[1])) {
+    return [world_coord[0], world_coord[1], elevation]
+  } else {
+    console.log('Something is rotten within image2world method.') 
+    console.log('See', img_coord_now, 'compared to', img_coord)
+    console.log('We should recalc world_x/world_y using a different elevation and try again')
+    return [world_coord[0], world_coord[1], elevation]
+  }
+}
+
 /**
  * Checks whether two numbers are equal enough within a given limit
  * @param {number} num1 - First number to check
@@ -216,7 +198,7 @@ async function getZ(xcoor, ycoor, auth) {
  * @param {number} [deviation] - The numbers may be off by this amount. Default is 0.5
  * @returns {boolean} `true` if numbers are approximately equal
  */
-function checkDeviation(num1, num2, deviation = 0.5) {
+function checkDeviation(num1, num2, deviation = 0.3) {
   if (Math.abs(num1 - num2) >= deviation) {
     return false
   } else {

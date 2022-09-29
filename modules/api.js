@@ -158,9 +158,10 @@ function getDHM(query, auth) {
  * API method to fetch DHM terrain data in a given area
  * @param {[x1 ,y1, x2, y2]} bbox - Array of EPSG:25832 coordinates for a bounding box describing the area we want terrain data for.
  * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @param {array} [points] - Optional extra coordinates [lat,lon] you want included in the terrain data. (Max. 20 points)
  * @returns {object} Response data
  */
-function getTerrain(bbox, auth) {
+function getTerrain(bbox, auth, points) {
 
   // Normalize bbox values
   const bbox_ = bbox.map(function(coord) {
@@ -168,8 +169,8 @@ function getTerrain(bbox, auth) {
   })
 
   // Declare variables
-  const sampling_steps_x = 5
-  const sampling_steps_y = 5
+  const sampling_steps_x = 3
+  const sampling_steps_y = 3
   const range_x = Math.round( ( bbox_[2] - bbox_[0] ) / sampling_steps_x )
   const range_y = Math.round( ( bbox_[3] - bbox_[1] ) / sampling_steps_y )
   let coordinate_map = []
@@ -179,6 +180,11 @@ function getTerrain(bbox, auth) {
     for (let x = bbox_[0]; x < bbox_[2]; x = x + range_x) {
       coordinate_map.push([x,y])
     }
+  }
+  if (points && points.length < 20) { // For a total max of 50 points in request
+    points.forEach(function(point) {
+      coordinate_map.push(point)
+    })  
   }
 
   // Create a query string for the API GET request

@@ -168,7 +168,7 @@ function world2image(image_data, X, Y, Z = 0) {
   const col = ((x_dot-xx0)+(dimX))*(-1)/pix
   const row = ((y_dot-yy0)+(dimY))*(-1)/pix
 
-  return [Math.round(col), Math.round(row)]
+  return [col, row]
 }
 
 /**

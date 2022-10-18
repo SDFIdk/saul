@@ -1,6 +1,6 @@
 {
-  "name": "skraafoto-saul",
-  "version": "2.1.0",
+  "name": "@dataforsyningen/saul",
+  "version": "3.0.0",
   "description": "This is a collection of stand-alone methods for photogrammetry calculations and API interactions for 'Danske Skråfotos'.",
   "main": "index.js",
   "type": "module",

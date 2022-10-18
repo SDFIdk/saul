@@ -6,9 +6,9 @@ You can use these as building blocks for your own web application that wants to 
 
 ## Installation
 
-1. Install from [Github](https://github.com/SDFIdk/saul) (latest):
+1. Install iva NPM:
 ```
-npm install --save git@github.com:SDFIdk/saul.git
+npm i --save @dataforsyningen/saul
 ```
 
 2. Create a configuration file or Javascript object with proper values and make sure to load it into your application before using any of the SAUL utilities. This package ships with an example configuration file at `/example/config.js.example`
@@ -18,7 +18,7 @@ npm install --save git@github.com:SDFIdk/saul.git
 This is an example of how to import and use those utilities in Javascript:
 ```
 import auth from './config.js' // This is the path to your configuration file
-import {getSTAC} from 'skraafoto-saul'
+import {getSTAC} from '@dataforsyningen/saul'
 
 let response = await getSTAC('/some-stac-endpoint', auth)
 console.log(response)
@@ -34,7 +34,7 @@ A `docs` directory will be created with a bunch of HTML files containing the doc
 
 ## How to test
 
-From within `node_modules/saul` you can run the `test` command to check that saul core features are still working.
+From within `node_modules/@dataforsyningen/saul` you can run the `test` command to check that saul core features are still working.
 ```
 npm run test
 ```

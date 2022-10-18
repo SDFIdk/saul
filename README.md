@@ -6,7 +6,7 @@ You can use these as building blocks for your own web application that wants to 
 
 ## Installation
 
-1. Install iva NPM:
+1. Install via NPM:
 ```
 npm i --save @dataforsyningen/saul
 ```

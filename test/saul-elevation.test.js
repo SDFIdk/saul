@@ -7,17 +7,17 @@ import { getTerrainGeoTIFF, getElevation } from '../modules/saul-elevation.js'
 import { get } from '../modules/api.js'
 import { getZ } from '../modules/saul-core.js'
 
-// variables and constants
-const width = 1000
-const height = 1000
+// Vars
+const stac_item = '2021_83_29_2_0019_00003995'
+const fidelity = 0.07 // Higher number means more points and better precision
+const max_deviation = 0.5
 
 // STAC API endpoint
 let url_stac = 'https://api.dataforsyningen.dk/skraafotoapi_test/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&token=9b554b6c854184c3b0f377ffc7481585'
-url_stac += '&ids=2021_83_29_2_0019_00003995'
+url_stac += `&ids=${ stac_item }`
 
 function is_equalIsh(num1, num2) {
-  const deviation = 0.5
-  if (Math.abs(num1 - num2) > deviation) {
+  if (Math.abs(num1 - num2) > max_deviation) {
     return false
   } else {
     return true
@@ -54,7 +54,6 @@ get(url_stac)
 
   console.log('Testing getTerrainGeoTIFF and getElevation')
 
-  const fidelity = 0.05  
   const width = Math.round( json.features[0].properties['proj:shape'][0] * fidelity )
   const height = Math.round( json.features[0].properties['proj:shape'][1] * fidelity )
   console.info('fetching', width * height, 'data points as GeoTiff image')

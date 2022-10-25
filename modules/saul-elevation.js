@@ -3,10 +3,10 @@ import { get } from './api.js'
 
 /** Fetches a GeoTIFF with elevation data matching the bounding box of a STAC API item (image)
  * @param {object} stac_item - STAC API item from a featureCollection request
- * @param {number} [fidelity] - Resolution fidelity betweeen 1 and 0. Higher number means more pixels and better precision.
+ * @param {number} [fidelity] - Resolution fidelity. Higher number means more pixels and better precision. Between 1 and 0.01.
  * @returns {object} GeoTiff data
  */
-function getTerrainGeoTIFF(stac_item, fidelity = 0.03) {
+function getTerrainGeoTIFF(stac_item, fidelity = 0.05) {
   
   const bbox = stac_item.bbox
   const width = Math.round( stac_item.properties['proj:shape'][0] * fidelity )

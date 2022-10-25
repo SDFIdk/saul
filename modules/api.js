@@ -62,24 +62,31 @@ function getErrorMsg() {
   return error_msg
 }
 
-/** Returns JSON response data */
-function HttpResponseHandler(response) {
+/** Returns response data */
+function HttpResponseHandler(response, is_json) {
   if (!response.ok) {
     error_msg = response.status
     interruptLoading()
     throw new Error(`HTTP error! Status: ${ response.status }`)
   }
-  // We assume the returned data is JSON
-  return response.json()
+  if (is_json) {
+    // We assume the returned data is JSON
+    return response.json()
+  } else {
+    // Return whatever and let someone else worry about parsing it
+    return response
+  }
+  
 }
 
 /** 
  * GET HTTP responsee from API
  * @param {string} url - API service URL, including endpoint paths and query parameters.
  * @param {object} [config] - Custom request configs. See https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#supplying_request_options
+ * @param {boolean} [is_json] - `true` if requested output is JSON
  * @returns {object} response object
  */
-function get(url, config = {}) {
+function get(url, config = {}, is_json = true) {
   if (!url) {
     console.error('Could not fetch data. Missing API URL')
   } else {
@@ -89,7 +96,7 @@ function get(url, config = {}) {
       method: 'GET'
     })
     .then((response) => {
-      return HttpResponseHandler(response)
+      return HttpResponseHandler(response, is_json)
     })
     .then((response) => {
       // Finally, return the parsed JSON response

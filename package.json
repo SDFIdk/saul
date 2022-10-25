@@ -27,6 +27,7 @@
     "jsdoc": "^3.6.10"
   },
   "dependencies": {
+    "geotiff": "^2.0.5",
     "proj4": "^2.8.0"
   }
 }

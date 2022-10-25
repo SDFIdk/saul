@@ -2,6 +2,7 @@
 // Check config.js.example for info on how to set it up
 import auth from '../config.js'
 
+import assert from 'assert'
 import { getTerrainGeoTIFF, getElevation } from '../modules/saul-elevation.js'
 import { get } from '../modules/api.js'
 import { getZ } from '../modules/saul-core.js'
@@ -13,6 +14,15 @@ const height = 1000
 // STAC API endpoint
 let url_stac = 'https://api.dataforsyningen.dk/skraafotoapi_test/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&token=9b554b6c854184c3b0f377ffc7481585'
 url_stac += '&ids=2021_83_29_2_0019_00003995'
+
+function is_equalIsh(num1, num2) {
+  const deviation = 0.5
+  if (Math.abs(num1 - num2) > deviation) {
+    return false
+  } else {
+    return true
+  }
+}
 
 function getRandomCoordinate(bbox) {
   const x = bbox[0] + Math.random() * (bbox[2] - bbox[0])
@@ -32,20 +42,24 @@ function compareElevations(x,y,geotiff) {
   .then(elevation => {
     getZ(x, y, auth)
     .then(getz_e => {
-      console.log('comparing at', x, y)
-      console.log('getElevation/getZ', elevation, '/', getz_e)
-      console.log('delta is', Number(Math.abs(getz_e - elevation).toFixed(2)))
+      assert(is_equalIsh(getz_e, elevation), `Elevations ${elevation} / ${getz_e} at ${x} ${y} do not match`)
+      console.log(`Elevation with delta ${Math.abs(elevation - getz_e).toFixed(2)} OK`)
     })
   })
 }
 
+// Test getTerrainGeoTIFF and getElevation with a STAC API item
 get(url_stac)
 .then((json) => {
 
-  console.log('feature', json.features[0].properties['proj:shape'])
-  console.log('bbox', json.features[0].bbox)
+  console.log('Testing getTerrainGeoTIFF and getElevation')
 
-  getTerrainGeoTIFF(json.features[0])
+  const fidelity = 0.05  
+  const width = Math.round( json.features[0].properties['proj:shape'][0] * fidelity )
+  const height = Math.round( json.features[0].properties['proj:shape'][1] * fidelity )
+  console.info('fetching', width * height, 'data points as GeoTiff image')
+
+  getTerrainGeoTIFF(json.features[0], fidelity)
   .then(data => {
 
     testDataAnumberOfTimes(data, json.features[0].bbox, 5)
@@ -69,4 +83,3 @@ get(url_stac)
 .catch((err) => {
   console.log('THE ERROR', err)
 })
-

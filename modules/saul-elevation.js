@@ -1,13 +1,16 @@
 import { fromArrayBuffer } from 'geotiff'
 import { get } from './api.js'
 
-function getTerrainGeoTIFF(stac_item) {
+/** Fetches a GeoTIFF with elevation data matching the bounding box of a STAC API item (image)
+ * @param {object} stac_item - STAC API item from a featureCollection request
+ * @param {number} [fidelity] - Resolution fidelity betweeen 1 and 0. Higher number means more pixels and better precision.
+ * @returns {object} GeoTiff data
+ */
+function getTerrainGeoTIFF(stac_item, fidelity = 0.03) {
   
-  const fidelity = 30
   const bbox = stac_item.bbox
-  const width = Math.round( stac_item.properties['proj:shape'][0] / fidelity )
-  const height = Math.round( stac_item.properties['proj:shape'][1] / fidelity )
-  console.info('fetching', width * height, 'data points as GeoTiff image')
+  const width = Math.round( stac_item.properties['proj:shape'][0] * fidelity )
+  const height = Math.round( stac_item.properties['proj:shape'][1] * fidelity )
 
   // DHM data endpoint
   let url = 'https://api.dataforsyningen.dk/dhm_wcs_DAF?SERVICE=WCS&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&COVERAGE=dhm_terraen&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0'
@@ -53,8 +56,6 @@ async function getElevation(x, y, geoTiff) {
 
   const window = [ xPx, yPx, xPx + 1, yPx + 1 ]
   const elevation_data = await geoTiff.readRasters( {window} )
-  
-  console.log('GeoTIFFpx from coords', x, y, xPx, yPx)
 
   return Math.round( elevation_data[0][0] * 10) / 10
 }

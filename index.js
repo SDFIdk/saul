@@ -19,3 +19,8 @@ export {
   epsg25832proj,
   createTranslator
 } from './modules/saul-projection.js'
+
+export {
+  getTerrainGeoTIFF,
+  getElevation
+} from './modules/saul-elevation.js'

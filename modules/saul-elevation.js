@@ -3,22 +3,24 @@ import { get } from './api.js'
 
 /** Fetches a GeoTIFF with elevation data matching the bounding box of a STAC API item (image)
  * @param {object} stac_item - STAC API item from a featureCollection request
+ * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
  * @param {number} [fidelity] - Resolution fidelity. Higher number means more pixels and better precision. Between 1 and 0.01.
  * @returns {object} GeoTiff data
  */
-function getTerrainGeoTIFF(stac_item, fidelity = 0.05) {
+function getTerrainGeoTIFF(stac_item, auth, fidelity = 0.05) {
   
   const bbox = stac_item.bbox
   const width = Math.round( stac_item.properties['proj:shape'][0] * fidelity )
   const height = Math.round( stac_item.properties['proj:shape'][1] * fidelity )
 
   // DHM data endpoint
-  let url = 'https://api.dataforsyningen.dk/dhm_wcs_DAF?SERVICE=WCS&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&COVERAGE=dhm_terraen&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0'
-  url += '&token=9b554b6c854184c3b0f377ffc7481585' // TODO: Should be auth stuff
+  let url = 'https://services.datafordeler.dk/DHMNedboer/dhm_wcs/1.0.0/WCS'
+  url += '?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0'
+  url += `&username=${ auth.API_DHM_USERNAME }&password=${ auth.API_DHM_PASSWORD }` // TODO: Should be auth stuff
   url += `&height=${ height }`
   url += `&width=${ width }`
-  url += `&BBOX=${ bbox[0]},${ bbox[1]},${ bbox[2]},${ bbox[3]}`
-  
+  url += `&bbox=${ bbox[0]},${ bbox[1]},${ bbox[2]},${ bbox[3]}`
+
   return get(url, {}, false)
   .then((response) => {
     return response.arrayBuffer()

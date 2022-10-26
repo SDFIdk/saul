@@ -43,7 +43,7 @@ function compareElevations(x,y,geotiff) {
     getZ(x, y, auth)
     .then(getz_e => {
       assert(is_equalIsh(getz_e, elevation), `Elevations ${elevation} / ${getz_e} at ${x} ${y} do not match`)
-      console.log(`Elevation with delta ${Math.abs(elevation - getz_e).toFixed(2)} OK`)
+      console.log(`Elevation at ${ x } ${ y } with delta ${Math.abs(elevation - getz_e).toFixed(2)} OK`)
     })
   })
 }
@@ -58,7 +58,7 @@ get(url_stac)
   const height = Math.round( json.features[0].properties['proj:shape'][1] * fidelity )
   console.info('fetching', width * height, 'data points as GeoTiff image')
 
-  getTerrainGeoTIFF(json.features[0], fidelity)
+  getTerrainGeoTIFF(json.features[0], auth, fidelity)
   .then(data => {
 
     testDataAnumberOfTimes(data, json.features[0].bbox, 5)
@@ -75,6 +75,8 @@ get(url_stac)
     compareElevations(right,up,data) // Right up
     compareElevations(right,low,data) // Right low
     compareElevations(c1,c2,data) // Center center
+    
+    compareElevations(532778.74,6172695.2,data)
     
   })
 

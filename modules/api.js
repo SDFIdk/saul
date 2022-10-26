@@ -67,7 +67,7 @@ function HttpResponseHandler(response, is_json) {
   if (!response.ok) {
     error_msg = response.status
     interruptLoading()
-    throw new Error(`HTTP error! Status: ${ response.status }`)
+    throw new Error(`HTTP error! ${ response.status }`)
   }
   if (is_json) {
     // We assume the returned data is JSON

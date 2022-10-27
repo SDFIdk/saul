@@ -3,8 +3,9 @@
 export {
   image2world,
   world2image,
-  getZ,
-  iterate
+  getWorldXYZ,
+  getZ, // Deprecated. Use getElevation
+  iterate // Deprecated. Use getWorldXYZ
 } from './modules/saul-core.js'
 
 export {
@@ -19,3 +20,8 @@ export {
   epsg25832proj,
   createTranslator
 } from './modules/saul-projection.js'
+
+export {
+  getTerrainGeoTIFF,
+  getElevation
+} from './modules/saul-elevation.js'

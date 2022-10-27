@@ -3,6 +3,9 @@
  */
  
 import { getDHM } from './api.js'
+import { getElevation } from './saul-elevation.js'
+
+let iterations
 
 /** 
  * Converts x,y coordinates from an image to real world lat,lon coordinates
@@ -117,7 +120,7 @@ function radians(degrees) {
 }
 
 /** 
- * Fetches elevation based on X,Y coordinates using DHM/Koter endpoint
+ * (DEPRECATED - Use getElevation) Fetches elevation based on X,Y coordinates using DHM/Koter endpoint
  * @param {number} xcoor - EPSG:25832 X coordinate
  * @param {number} ycoor - EPSG:25832 Y coordinate
  * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
@@ -129,7 +132,7 @@ async function getZ(xcoor, ycoor, auth) {
   return z
 }
 
-/** Iterates guessing at a world coordinate using image coordinates and elevation info */
+/** (DEPRECATED - Use getWorldXYZ) Iterates guessing at a world coordinate using image coordinates and elevation info */
 function iterateRecursive(image_data, col, row, z, count, limit, auth, i) {
 
   // Get coordinates based on current z value
@@ -159,7 +162,7 @@ function iterateRecursive(image_data, col, row, z, count, limit, auth, i) {
 }
 
 /** 
- * Tries to guess world coordinate for a pixel position within an image using STAC API image data and requests to DHM elevation data.
+ * (DEPRECATED - Use getWorldXYZ) Tries to guess world coordinate for a pixel position within an image using STAC API image data and requests to DHM elevation data.
  * @param {object} image_data - image item data from STAC API
  * @param {number} col - image x coordinate (from left to right)
  * @param {number} row - image y coordinate (from top to bottom)
@@ -172,8 +175,98 @@ function iterate(image_data, col, row, auth, limit = 1) {
   return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth, i)
 }
 
+/** Find world coordinate and elevation that correspond to image x,y. Uses image item information from STAC API and a GeoTIFF terrain model from Datafordeler.
+ * @param {object} options
+ * @param {array} options.xy - image coordinates
+ * @param {object} options.image - STAC API item
+ * @param {object} options.terrain - GeoTIFF object from getTerrainGeoTIFF() output
+ * @returns {array} Array with world coordinates (indexes 0 and 1) and elevation (index 2). Coordinates are EPSG:25832 format.
+ */
+async function getWorldXYZ(options) {
+
+  iterations = 1
+
+  const world_xyz = image2world(options.image, options.xy[0], options.xy[1], 0)
+  const better_world_xyz = await compareXYZ({
+    xy: options.xy,
+    image: options.image,
+    terrain: options.terrain,
+    world_xyz: Array.from(world_xyz),
+    limit: 0.5
+  })
+  return better_world_xyz
+}
+
+/**
+ * Adjusts elevation value if values are too far apart
+ * @param {number} z - elevation
+ * @param {number} delta_y - discrepancy value 
+ * @returns {number} Adjusted elevation number
+ */
+function adjustZ(z, delta_y) {
+  let new_z
+  if (delta_y < 0) {
+    new_z = z + 0.1
+  } else {
+    new_z = z - 0.1
+  }
+  console.log('z', new_z)
+  return new_z
+}
+
+/**
+ * Compares differences i x and y values
+ * @param {number} delta_x - x difference
+ * @param {number} delta_y - y difference
+ * @param {number} limit - difference may be within this limit
+ * @returns {boolean} Returns true if differences are within accepted limit
+ */
+function compareXY(delta_x, delta_y, limit) {
+  if (Math.abs(delta_x) > limit || Math.abs(delta_y) > limit) {
+    return false
+  } else {
+    return true
+  }
+}
+
+/** 
+ * Iterates world coordinate calculations in order to get a more precise result
+ * @param {object} options 
+ * @param {array} options.xy - image coordinates
+ * @param {object} options.image - STAC API item
+ * @param {object} options.terrain - GeoTIFF object from getTerrainGeoTIFF() output
+ * @param {array} options.world_xy - Array with (currently guessed) world coordinates (indexes 0 and 1) and elevation (index 2). Coordinates are EPSG:25832 format.
+ * @param {number} options.limit - Return when two guesses are within this limit
+ * @returns {array} Array with world coordinates (indexes 0 and 1) and elevation (index 2). Coordinates are EPSG:25832 format.
+ */
+async function compareXYZ(options) {
+
+  iterations++
+  if (iterations > 50) {
+    console.error('too many iterations')
+    return false
+  }
+
+  const z = await getElevation(options.xy[0], options.xy[1], options.terrain)
+  const world_xyz = image2world(options.image, options.xy[0], options.xy[1], z)
+  const delta_x = world_xyz[0] - options.world_xyz[0]
+  const delta_y = world_xyz[1] - options.world_xyz[1]
+  
+  if (!compareXY(delta_x, delta_y, options.limit)) {
+    
+    const new_options = Object.assign({},options)
+    new_options.world_xyz = Array.from(world_xyz)
+    new_options.world_xyz[2] = adjustZ(world_xyz[2], delta_x, delta_y)
+    return await compareXYZ(new_options)
+
+  } else {
+    return world_xyz
+  }
+}
+
 export { 
   image2world,
+  getWorldXYZ,
   world2image,
   getZ,
   iterate

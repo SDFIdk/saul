@@ -5,11 +5,11 @@ import auth from '../config.js'
 import assert from 'assert'
 import { getTerrainGeoTIFF, getElevation } from '../modules/saul-elevation.js'
 import { get } from '../modules/api.js'
-import { getZ } from '../modules/saul-core.js'
+import { getZ, getWorldXYZ } from '../modules/saul-core.js'
 
 // Vars
 const stac_item = '2021_83_29_2_0019_00003995'
-const fidelity = 0.07 // Higher number means more points and better precision
+const fidelity = 0.05 // Higher number means more points and better precision
 const max_deviation = 0.5
 
 // STAC API endpoint
@@ -31,7 +31,7 @@ function getRandomCoordinate(bbox) {
 }
 
 function testDataAnumberOfTimes(data, bbox, times) {
-  for (let i = 1; i < times; i++) {
+  for (let i = 1; i <= times; i++) {
     const world1 = getRandomCoordinate(bbox)
     compareElevations(world1[0], world1[1], data)
   }
@@ -56,28 +56,22 @@ get(url_stac)
 
   const width = Math.round( json.features[0].properties['proj:shape'][0] * fidelity )
   const height = Math.round( json.features[0].properties['proj:shape'][1] * fidelity )
+
   console.info('fetching', width * height, 'data points as GeoTiff image')
 
   getTerrainGeoTIFF(json.features[0], auth, fidelity)
   .then(data => {
 
     testDataAnumberOfTimes(data, json.features[0].bbox, 5)
-
-    const left = json.features[0].bbox[0] + 50
-    const low = json.features[0].bbox[1] + 50
-    const right = json.features[0].bbox[2] - 50
-    const up = json.features[0].bbox[3] - 50
-    const c1 = left + ((right - left) / 2)
-    const c2 = low + ((up - low) / 2)
-
-    compareElevations(left,low,data) // Left low
-    compareElevations(left,up,data) // Left up
-    compareElevations(right,up,data) // Right up
-    compareElevations(right,low,data) // Right low
-    compareElevations(c1,c2,data) // Center center
     
-    compareElevations(532778.74,6172695.2,data)
-    
+    getWorldXYZ({
+      xy: [1,1],
+      image: json.features[0],
+      terrain: data
+    }).then(world_xy => {
+      compareElevations(world_xy[0], world_xy[1], data) // lower left corner of image
+    })
+
   })
 
 })

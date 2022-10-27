@@ -3,8 +3,9 @@
 export {
   image2world,
   world2image,
-  getZ,
-  iterate
+  getWorldXYZ,
+  getZ, // Deprecated. Use getElevation
+  iterate // Deprecated. Use getWorldXYZ
 } from './modules/saul-core.js'
 
 export {

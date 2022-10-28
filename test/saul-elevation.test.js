@@ -5,7 +5,7 @@ import auth from '../config.js'
 import assert from 'assert'
 import { getTerrainGeoTIFF, getElevation } from '../modules/saul-elevation.js'
 import { get } from '../modules/api.js'
-import { getZ, getWorldXYZ } from '../modules/saul-core.js'
+import { getZ, getWorldXYZ, world2image } from '../modules/saul-core.js'
 
 // Vars
 const stac_item = '2021_83_29_2_0019_00003995'
@@ -16,8 +16,8 @@ const max_deviation = 0.5
 let url_stac = 'https://api.dataforsyningen.dk/skraafotoapi_test/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&token=9b554b6c854184c3b0f377ffc7481585'
 url_stac += `&ids=${ stac_item }`
 
-function is_equalIsh(num1, num2) {
-  if (Math.abs(num1 - num2) > max_deviation) {
+function is_equalIsh(num1, num2, deviation = max_deviation) {
+  if (Math.abs(num1 - num2) > deviation) {
     return false
   } else {
     return true
@@ -30,10 +30,35 @@ function getRandomCoordinate(bbox) {
   return [x,y]
 }
 
-function testDataAnumberOfTimes(data, bbox, times) {
+function testGetElevationAnumberOfTimes(data, bbox, times) {
   for (let i = 1; i <= times; i++) {
     const world1 = getRandomCoordinate(bbox)
     compareElevations(world1[0], world1[1], data)
+  }
+}
+
+function getRandomImageXY(image) {
+  const shapex = image.properties['proj:shape'][0]
+  const shapey = image.properties['proj:shape'][1]
+  const x = Math.floor(shapex - Math.random() * shapex)
+  const y = Math.floor(shapey - Math.random() * shapey)
+  return [x,y]
+}
+
+function testGetWorldXYZAnumberOfTimes(item, terrain, times) {
+  for (let i = 1; i <= times; i++) {
+    const xy = getRandomImageXY(item)
+    getWorldXYZ({
+      xy: xy,
+      image: item,
+      terrain: terrain
+    }).then(world_xy => {
+      compareElevations(world_xy[0], world_xy[1], terrain) // lower left corner of image
+      const image_coords = world2image(item, world_xy[0], world_xy[1], world_xy[2])
+      assert(is_equalIsh(image_coords[0], xy[0], 0.75), `Image x coordinates ${image_coords[0]} / ${xy[0]} do not match`)
+      assert(is_equalIsh(image_coords[1], xy[1], 0.75), `Image y coordinates ${image_coords[1]} / ${xy[1]} do not match`)
+      console.log('getWorldXYZ => world2image OK')
+    })
   }
 }
 
@@ -52,8 +77,6 @@ function compareElevations(x,y,geotiff) {
 get(url_stac)
 .then((json) => {
 
-  console.log('Testing getTerrainGeoTIFF and getElevation')
-
   const width = Math.round( json.features[0].properties['proj:shape'][0] * fidelity )
   const height = Math.round( json.features[0].properties['proj:shape'][1] * fidelity )
 
@@ -62,15 +85,19 @@ get(url_stac)
   getTerrainGeoTIFF(json.features[0], auth, fidelity)
   .then(data => {
 
-    testDataAnumberOfTimes(data, json.features[0].bbox, 5)
-    
-    getWorldXYZ({
-      xy: [1,1],
-      image: json.features[0],
-      terrain: data
-    }).then(world_xy => {
-      compareElevations(world_xy[0], world_xy[1], data) // lower left corner of image
-    })
+    // Testing getElevation
+    try {
+      testGetElevationAnumberOfTimes(data, json.features[0].bbox, 5)
+    } catch(error) {
+      console.error(error)
+    }
+
+    // Testing getWorldXYZ
+    try {
+      testGetWorldXYZAnumberOfTimes(json.features[0], data, 10)
+    } catch(error) {
+      console.error(error)
+    }
 
   })
 

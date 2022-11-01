@@ -173,6 +173,26 @@ function iterate(image_data, col, row, auth, limit = 1) {
   return iterateRecursive(image_data, col, row, 0.5, 0, limit, auth, i)
 }
 
+async function compareZ(options) {
+
+  // Get coordinates based on current z value
+  const world_xyz = image2world(options.image, options.xy[0], options.xy[1], options.z)
+  // Get new z value from coordinates
+  world_xyz[2] = await getElevation(world_xyz[0], world_xyz[1], options.terrain)
+  // How big is the different between z and new z?
+  const delta = Math.abs(world_xyz[2] - options.z)
+  
+  // Check delta vs. limit. If the difference is too big, try building coordinates with the new z
+  // Make sure the recursive loop ends at some point (iteration = 50) even if no precise z is found
+  if (options.iteration < 50 && delta > options.limit) {
+    options.iteration++
+    options.z = world_xyz[2]
+    return compareZ(options)
+  } else {
+    return world_xyz
+  }
+}
+
 /** Find world coordinate and elevation that correspond to image x,y. Uses image item information from STAC API and a GeoTIFF terrain model from Datafordeler.
  * @param {object} options
  * @param {array} options.xy - image coordinates
@@ -181,12 +201,17 @@ function iterate(image_data, col, row, auth, limit = 1) {
  * @returns {array} Array with world coordinates (indexes 0 and 1) and elevation (index 2). Coordinates are EPSG:25832 format.
  */
 async function getWorldXYZ(options) {
-
-  const world_xyz = image2world(options.image, options.xy[0], options.xy[1], 0)
-  world_xyz[2] = await getElevation(world_xyz[0], world_xyz[1], options.terrain)
-  const better_world_xyz = image2world(options.image, options.xy[0], options.xy[1], world_xyz[2])
   
-  return better_world_xyz
+  const best_world_xyz = compareZ({
+    image: options.image,
+    terrain: options.terrain,
+    xy: options.xy,
+    z: 0,
+    limit: 0.5,
+    iteration: 1
+  })
+
+  return best_world_xyz
 }
 
 export { 

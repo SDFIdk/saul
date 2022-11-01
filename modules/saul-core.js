@@ -118,7 +118,7 @@ function radians(degrees) {
 }
 
 /** 
- * (DEPRECATED - Use getElevation) Fetches elevation based on X,Y coordinates using DHM/Koter endpoint
+ * Fetches a single elevation value based on X,Y coordinates using DHM/Koter endpoint
  * @param {number} xcoor - EPSG:25832 X coordinate
  * @param {number} ycoor - EPSG:25832 Y coordinate
  * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.

@@ -200,14 +200,14 @@ async function compareZ(options) {
  * @param {object} options.terrain - GeoTIFF object from getTerrainGeoTIFF() output
  * @returns {array} Array with world coordinates (indexes 0 and 1) and elevation (index 2). Coordinates are EPSG:25832 format.
  */
-async function getWorldXYZ(options) {
+async function getWorldXYZ(options, precision = 0.3) {
   
   const best_world_xyz = compareZ({
     image: options.image,
     terrain: options.terrain,
     xy: options.xy,
     z: 0,
-    limit: 0.5,
+    limit: precision,
     iteration: 1
   })
 

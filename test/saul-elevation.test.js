@@ -9,7 +9,7 @@ import { getZ, getWorldXYZ, world2image } from '../modules/saul-core.js'
 
 // Vars
 const stac_item = '2021_83_29_2_0019_00003995'
-const fidelity = 0.05 // Higher number means more points and better precision
+const fidelity = 0.03 // Higher number means more points and better precision
 const max_deviation = 0.5
 
 // STAC API endpoint
@@ -53,10 +53,10 @@ function testGetWorldXYZAnumberOfTimes(item, terrain, times) {
       image: item,
       terrain: terrain
     }).then(world_xy => {
-      compareElevations(world_xy[0], world_xy[1], terrain) // lower left corner of image
+      compareElevations(world_xy[0], world_xy[1], terrain)
       const image_coords = world2image(item, world_xy[0], world_xy[1], world_xy[2])
-      assert(is_equalIsh(image_coords[0], xy[0], 0.75), `Image x coordinates ${image_coords[0]} / ${xy[0]} do not match`)
-      assert(is_equalIsh(image_coords[1], xy[1], 0.75), `Image y coordinates ${image_coords[1]} / ${xy[1]} do not match`)
+      assert(is_equalIsh(image_coords[0], xy[0], 2), `Image x coordinates ${image_coords[0]} / ${xy[0]} do not match`)
+      assert(is_equalIsh(image_coords[1], xy[1], 2), `Image y coordinates ${image_coords[1]} / ${xy[1]} do not match`)
       console.log('getWorldXYZ => world2image OK')
     })
   }
@@ -67,7 +67,7 @@ function compareElevations(x,y,geotiff) {
   .then(elevation => {
     getZ(x, y, auth)
     .then(getz_e => {
-      assert(is_equalIsh(getz_e, elevation), `Elevations ${elevation} / ${getz_e} at ${x} ${y} do not match`)
+      assert(is_equalIsh(getz_e, elevation, 0.5), `Elevations ${elevation} / ${getz_e} at ${x} ${y} do not match`)
       console.log(`Elevation at ${ x } ${ y } with delta ${Math.abs(elevation - getz_e).toFixed(2)} OK`)
     })
   })

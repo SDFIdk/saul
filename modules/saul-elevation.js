@@ -30,12 +30,14 @@ function getTerrainGeoTIFF(stac_item, auth, fidelity = 0.05) {
   })
 }
 
+/** Converts raw GeoTIFF arrayBuffer to image */
 async function consumeGeoTIFF(raw_data) {
   const tiff = await fromArrayBuffer(raw_data)
   const image = await tiff.getImage()
   return image
 }
 
+/** Constrain coordinates to be within a bounding box */
 function constrainToBbox(bbox, x, y) {
   let new_x = x
   let new_y = y

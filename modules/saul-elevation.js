@@ -4,14 +4,14 @@ import { get } from './api.js'
 /** Fetches a GeoTIFF with elevation data matching the bounding box of a STAC API item (image)
  * @param {object} stac_item - STAC API item from a featureCollection request
  * @param {{API_DHM_WCS_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
- * @param {number} [fidelity] - Resolution fidelity. Higher number means more pixels and better precision. Between 1 and 0.01.
+ * @param {number} [resolution] - Resolution (1 - 0.01). Higher number means more pixels and better precision.
  * @returns {object} GeoTiff data
  */
-function getTerrainGeoTIFF(stac_item, auth, fidelity = 0.05) {
+function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05) {
   
   const bbox = stac_item.bbox
-  const width = Math.round( stac_item.properties['proj:shape'][0] * fidelity )
-  const height = Math.round( stac_item.properties['proj:shape'][1] * fidelity )
+  const width = Math.round( stac_item.properties['proj:shape'][0] * resolution )
+  const height = Math.round( stac_item.properties['proj:shape'][1] * resolution )
 
   // GET request for DHM WCS data
   let url = auth.API_DHM_WCS_BASEURL

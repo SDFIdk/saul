@@ -3,8 +3,8 @@
 import auth from '../config.js'
 
 import assert from 'assert'
-import { getTerrainGeoTIFF, getElevation } from '../modules/saul-elevation.js'
-import { get } from '../modules/api.js'
+import { getElevation } from '../modules/saul-elevation.js'
+import { get, getTerrainGeoTIFF } from '../modules/api.js'
 import { getZ, getWorldXYZ, world2image } from '../modules/saul-core.js'
 
 // Vars

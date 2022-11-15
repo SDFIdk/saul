@@ -2,6 +2,8 @@
  * SAUL API utilities 
  */
 
+import { fromArrayBuffer } from 'geotiff'
+
 let error_msg
 let load_stack = []
 
@@ -185,11 +187,49 @@ function postSTAC(endpoint, data, auth) {
 }
 
 
+/** Converts raw GeoTIFF arrayBuffer to image */
+async function consumeGeoTIFF(raw_data) {
+  const tiff = await fromArrayBuffer(raw_data)
+  const image = await tiff.getImage()
+  return image
+}
+
+
+/** Fetches a GeoTIFF with elevation data matching the bounding box of a STAC API item (image)
+ * @param {object} stac_item - STAC API item from a featureCollection request
+ * @param {{API_DHM_WCS_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @param {number} [resolution] - Resolution (1 - 0.01). Higher number means more pixels and better precision.
+ * @returns {object} GeoTiff data
+ */
+function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05) {
+  
+  const bbox = stac_item.bbox
+  const width = Math.round( stac_item.properties['proj:shape'][0] * resolution )
+  const height = Math.round( stac_item.properties['proj:shape'][1] * resolution )
+
+  // GET request for DHM WCS data
+  let url = auth.API_DHM_WCS_BASEURL
+  url += '?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0'
+  url += `&username=${ auth.API_DHM_USERNAME }&password=${ auth.API_DHM_PASSWORD }` // TODO: Should be auth stuff
+  url += `&height=${ height }`
+  url += `&width=${ width }`
+  url += `&bbox=${ bbox[0]},${ bbox[1]},${ bbox[2]},${ bbox[3]}`
+
+  return get(url, {}, false)
+  .then((response) => {
+    return response.arrayBuffer()
+  })
+  .then((arrayBuffer) => {
+    return consumeGeoTIFF(arrayBuffer)
+  })
+}
+
 
 export {
   get,
   post,
   getSTAC,
   postSTAC,
-  getDHM
+  getDHM,
+  getTerrainGeoTIFF
 }

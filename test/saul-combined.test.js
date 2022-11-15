@@ -2,21 +2,38 @@
 // Check config.js.example for info on how to set it up
 import auth from '../config.js'
 import assert from 'assert'
-import { getTerrainGeoTIFF, getElevation } from '../modules/saul-elevation.js'
-import { get } from '../modules/api.js'
-import { getZ, getWorldXYZ, world2image } from '../modules/saul-core.js'
+import { getElevation } from '../modules/saul-elevation.js'
+import { getSTAC, getTerrainGeoTIFF } from '../modules/api.js'
+import { getZ, getWorldXYZ, getImageXY } from '../modules/saul-core.js'
 
 
 // Vars
-const resolution = 0.03 // Higher number means more points and better precision
+const resolution = 0.1 // Higher number means more points and better precision
 const max_deviation = 0.5
 
-const item_1 = {
+// North
+let item_1 = {
   id: '2021_83_29_2_0019_00003995',
-  stac_url: generateSTACurl(this.id)
+  xy: [400,400]
+}
+// East
+let item_2 = {
+  id: '2021_83_29_4_0016_00002877'
+}
+// West
+let item_3 = {
+  id: '2021_83_29_5_0022_00003276'
+}
+// South
+let item_4 = {
+  id: '2021_83_29_3_0019_00003975'
+}
+// Nadir
+let item_5 = {
+  id: '2021_83_29_1_0019_00003985'
 }
 
-
+// Helper functions
 function is_equalIsh(num1, num2, deviation = max_deviation) {
   if (Math.abs(num1 - num2) > deviation) {
     return false
@@ -24,42 +41,62 @@ function is_equalIsh(num1, num2, deviation = max_deviation) {
     return true
   }
 }
-
 function generateSTACurl(stac_item_id) {
-  let url = `${ auth.API_STAC_BASEURL }/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&token=${ auth.API_STAC_TOKEN }`
-  url += `&ids=${ stac_item_id }`
-  return url
+  return `/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&ids=${ stac_item_id }`
+}
+async function enrichData(item) {
+  let new_item = Object.assign({}, item)
+  // add STAC item
+  new_item.item = await getSTAC(generateSTACurl(new_item.id), auth)
+  new_item.item = new_item.item.features[0]
+  // add terrain GeoTIFF
+  new_item.terrain = await getTerrainGeoTIFF(new_item.item, auth, resolution)
+  // Add imageXY
+  new_item.xy = getImageXY(new_item.item, item_1.xyz[0], item_1.xyz[1], item_1.xyz[2])
+  // Add world XYZ (from imageYX)
+  new_item.xyz = await getWorldXYZ({
+    xy: new_item.xy,
+    image: new_item.item,
+    terrain: new_item.terrain
+  })
+  // add kote
+  new_item.kote = await getZ(new_item.xyz[0], new_item.xyz[1], auth)
+  // add resolution info
+  new_item.ext_x = Math.round((new_item.item.bbox[2] - new_item.item.bbox[0]) * 100) / 100
+  new_item.ext_y = Math.round((new_item.item.bbox[3] - new_item.item.bbox[1]) * 100) / 100
+  new_item.z_pr_m_x = Math.round((new_item.item.properties['proj:shape'][0] / new_item.ext_x) * 100  * resolution) / 100
+  new_item.z_pr_m_y = Math.round((new_item.item.properties['proj:shape'][1] / new_item.ext_y) * 100  * resolution) / 100
+  const width = Math.round( new_item.item.properties['proj:shape'][0] * resolution )
+  const height = Math.round( new_item.item.properties['proj:shape'][1] * resolution )
+  new_item.z_points = width * height
+  return new_item
 }
 
-// Test getTerrainGeoTIFF and getElevation with a STAC API item
-get(url_stac)
-.then((json) => {
+// Fetch image data and terrain
+item_1.item = await getSTAC(generateSTACurl(item_1.id), auth)
+item_1.item = item_1.item.features[0]
+item_1.terrain = await getTerrainGeoTIFF(item_1.item, auth, resolution)
 
-  const width = Math.round( json.features[0].properties['proj:shape'][0] * resolution )
-  const height = Math.round( json.features[0].properties['proj:shape'][1] * resolution )
-
-  console.info('fetching', width * height, 'data points as GeoTiff image')
-
-  getTerrainGeoTIFF(json.features[0], auth, resolution)
-  .then(data => {
-
-    // Testing getElevation
-    try {
-      testGetElevationAnumberOfTimes(data, json.features[0].bbox, 5)
-    } catch(error) {
-      console.error(error)
-    }
-
-    // Testing getWorldXYZ
-    try {
-      testGetWorldXYZAnumberOfTimes(json.features[0], data, 10)
-    } catch(error) {
-      console.error(error)
-    }
-
-  })
-
+// Given image XY for one image, get world XYZ
+item_1.xyz = await getWorldXYZ({
+  xy: item_1.xy,
+  image: item_1.item,
+  terrain: item_1.terrain
 })
-.catch((err) => {
-  console.log('THE ERROR', err)
+
+item_1.kote = await getZ(item_1.xyz[0], item_1.xyz[1], auth)
+
+// Get image and corresponding world coordinates for other images (amongst other things)
+item_2 = await enrichData(item_2)
+item_3 = await enrichData(item_3)
+item_4 = await enrichData(item_4)
+item_5 = await enrichData(item_5)
+
+// Compare items
+console.table({
+  north: item_1, 
+  east: item_2,
+  west: item_3,
+  south: item_4, 
+  nadir: item_5
 })

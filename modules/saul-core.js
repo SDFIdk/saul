@@ -57,18 +57,22 @@ function image2world(image_data, col, row, Z = 0) {
   var X = (Z-Z0)*kx + X0
   var Y = (Z-Z0)*ky + Y0
 
-  return[X,Y,Z]
+  return[
+    Math.round(X * 100) / 100,
+    Math.round(Y * 100) / 100,
+    Z
+  ]
 }
 
 /** 
- * Converts lat,lon coordinates to x,y coordinates within a specific image
+ * Converts world lat,lon coordinates to x,y coordinates within a specific image
  * @param {Object} image_data - skraafoto-stac-api image data
  * @param {Number} Y - northing
  * @param {Number} X - easting
  * @param {Number} [Z] - elevation (geoide)
  * @returns {array} [x,y] Column/row image coordinate 
  */
-function world2image(image_data, X, Y, Z = 0) {
+function getImageXY(image_data, X, Y, Z = 0) {
 
   // constants pulled from image_data
   const xx0  = image_data.properties['pers:interior_orientation'].principal_point_offset[0]
@@ -109,7 +113,22 @@ function world2image(image_data, X, Y, Z = 0) {
   var col = ((x_dot-xx0)+(dimX))*(-1)/pix
   var row = ((y_dot-yy0)+(dimY))*(-1)/pix
 
-  return [col, row]
+  return [
+    Math.round(col),
+    Math.round(row)
+  ]
+}
+
+/** 
+ * (DEPRECATED - Use getImageXY) Converts lat,lon coordinates to x,y coordinates within a specific image
+ * @param {Object} image_data - skraafoto-stac-api image data
+ * @param {Number} Y - northing
+ * @param {Number} X - easting
+ * @param {Number} [Z] - elevation (geoide)
+ * @returns {array} [x,y] Column/row image coordinate 
+ */
+function world2image(image_data, X, Y, Z = 0) {
+  return getImageXY(image_data, X, Y, Z)
 }
 
 /** Converts degress to radians */
@@ -216,8 +235,9 @@ async function getWorldXYZ(options, precision = 0.3) {
 
 export { 
   image2world,
-  getWorldXYZ,
   world2image,
+  getWorldXYZ,
+  getImageXY,
   getZ,
   iterate
 }

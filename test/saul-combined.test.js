@@ -2,9 +2,7 @@
 // Check config.js.example for info on how to set it up
 import auth from '../config.js'
 import assert from 'assert'
-import { getElevation } from '../modules/saul-elevation.js'
-import { getSTAC, getTerrainGeoTIFF } from '../modules/api.js'
-import { getZ, getWorldXYZ, getImageXY } from '../modules/saul-core.js'
+import { getSTAC, getTerrainGeoTIFF,getZ, getWorldXYZ, getImageXY } from '../index.js'
 
 
 // Vars

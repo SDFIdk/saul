@@ -3,9 +3,7 @@
 import auth from '../config.js'
 
 import assert from 'assert'
-import { getElevation } from '../modules/saul-elevation.js'
-import { get, getTerrainGeoTIFF } from '../modules/api.js'
-import { getZ, getWorldXYZ, world2image } from '../modules/saul-core.js'
+import { getElevation, get, getTerrainGeoTIFF, getZ, getWorldXYZ, world2image } from '../index.js'
 
 // Vars
 const stac_item = '2021_83_29_2_0019_00003995'

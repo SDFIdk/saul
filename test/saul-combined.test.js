@@ -6,13 +6,61 @@ import { getSTAC, getTerrainGeoTIFF,getZ, getWorldXYZ, getImageXY } from '../ind
 
 
 // Vars
-const resolution = 0.1 // Higher number means more points and better precision
+const resolution = 0.005 // Higher number means more points and better precision
 const max_deviation = 0.5
+
+/*
+// North
+let item_1 = {
+  id: '2021_83_29_2_0019_00003995',
+  xy: [1000,1000]
+}
+// East
+let item_2 = {
+  id: '2021_83_29_4_0016_00002877'
+}
+// West
+let item_3 = {
+  id: '2021_83_29_5_0022_00003276'
+}
+// South
+let item_4 = {
+  id: '2021_83_29_3_0019_00003975'
+}
+// Nadir
+let item_5 = {
+  id: '2021_83_29_1_0019_00003985'
+}
+*/
+
+/*
+// North
+let item_1 = {
+  id: '2021_83_33_2_0003_00002821',
+  xy: [8000,5000]
+}
+// East
+let item_2 = {
+  id: '2021_83_33_4_0002_00000845'
+}
+// West
+let item_3 = {
+  id: '2021_83_33_5_0005_00003192'
+}
+// South
+let item_4 = {
+  id: '2021_83_33_3_0004_00002970'
+}
+// Nadir
+let item_5 = {
+  id: '2021_83_33_1_0004_00002965'
+}
+*/
 
 // North
 let item_1 = {
   id: '2021_83_29_2_0019_00003995',
-  xy: [400,400]
+  xy: [1000,1000]
 }
 // East
 let item_2 = {

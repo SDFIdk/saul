@@ -2,7 +2,7 @@
 
 import assert from 'assert'
 import proj4 from 'proj4'
-import {epsg25832proj, createTranslator} from '../modules/saul-projection.js'
+import {epsg25832proj, createTranslator} from '../index.js'
 
 // Test epsg25832proj
 try {

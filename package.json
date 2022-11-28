@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo 'TESTS WILL ONLY RUN UNDER NODE v18' && node ./test/saul-projection.test.js && node ./test/saul-core.test.js && node ./test/saul-elevation.test.js",
+    "test": "echo 'TESTS WILL ONLY RUN UNDER NODE v18' && node ./test/saul-projection.test.js && node ./test/saul-core.test.js && node ./test/saul-combined.test.js && node ./test/saul-elevation.test.js",
     "docs": "jsdoc ./modules/*.js --destination docs"
   },
   "repository": {

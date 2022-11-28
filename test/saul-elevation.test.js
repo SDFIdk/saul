@@ -3,9 +3,7 @@
 import auth from '../config.js'
 
 import assert from 'assert'
-import { getTerrainGeoTIFF, getElevation } from '../modules/saul-elevation.js'
-import { get } from '../modules/api.js'
-import { getZ, getWorldXYZ, world2image } from '../modules/saul-core.js'
+import { getElevation, get, getTerrainGeoTIFF, getZ, getWorldXYZ, world2image } from '../index.js'
 
 // Vars
 const stac_item = '2021_83_29_2_0019_00003995'
@@ -13,7 +11,7 @@ const fidelity = 0.03 // Higher number means more points and better precision
 const max_deviation = 0.5
 
 // STAC API endpoint
-let url_stac = 'https://api.dataforsyningen.dk/skraafotoapi_test/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&token=9b554b6c854184c3b0f377ffc7481585'
+let url_stac = auth.API_STAC_BASEURL + '/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&token=9b554b6c854184c3b0f377ffc7481585'
 url_stac += `&ids=${ stac_item }`
 
 function is_equalIsh(num1, num2, deviation = max_deviation) {

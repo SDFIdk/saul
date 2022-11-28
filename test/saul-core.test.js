@@ -5,8 +5,7 @@
 import auth from '../config.js'
 
 import assert from 'assert'
-import {getSTAC} from '../modules/api.js'
-import {world2image, image2world, getZ, iterate} from '../modules/saul-core.js'
+import {getSTAC, world2image, image2world, getZ, iterate} from '../index.js'
 
 /*
 const item = await getSTAC('/collections/skraafotos2019/items/2019_83_37_2_0046_00001113', auth)
@@ -24,8 +23,7 @@ const image_x = 41839.698939
 const image_y = 3204.326930
 const world_elevation = 38.874336
 
-function is_equalIsh(num1, num2) {
-  const deviation = 0.05
+function is_equalIsh(num1, num2, deviation = 0.05) {
   if (Math.abs(num1 - num2) > deviation) {
     return false
   } else {
@@ -65,7 +63,7 @@ try {
 
   let xy = world2image(item, world_x, world_y, world_elevation)
 
-  assert(is_equalIsh(xy[0], image_x), "world2image fail: The x coordinate values are not equal")
+  assert(is_equalIsh(xy[0], image_x, 1), `world2image fail: The x coordinate values ${xy[0]} ${image_x} are not equal`)
   assert(is_equalIsh(xy[1], image_y), "world2image fail: The y coordinate values are not equal")
   
   console.log("Test world2image OK")

@@ -217,6 +217,7 @@ async function compareZ(options) {
  * @param {array} options.xy - image coordinates
  * @param {object} options.image - STAC API item
  * @param {object} options.terrain - GeoTIFF object from getTerrainGeoTIFF() output
+ * @param {number} precision - Precision in meters for "good enough"
  * @returns {array} Array with world coordinates (indexes 0 and 1) and elevation (index 2). Coordinates are EPSG:25832 format.
  */
 async function getWorldXYZ(options, precision = 0.3) {

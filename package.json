@@ -17,7 +17,11 @@
     "SDFI",
     "saul"
   ],
-  "author": "Styrelsen for Dataforsyning og Infrastruktur (https://sdfi.dk/)",
+  "author": {
+    "name" : "Styrelsen for Dataforsyning og Infrastruktur",
+    "email" : "support@sdfi.dk",
+    "url" : "https://sdfi.dk/"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/SDFIdk/saul/issues"

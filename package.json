@@ -1,6 +1,6 @@
 {
   "name": "@dataforsyningen/saul",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "This is a collection of stand-alone methods for photogrammetry calculations and API interactions for 'Danske Skråfotos'.",
   "main": "index.js",
   "type": "module",
@@ -18,9 +18,9 @@
     "saul"
   ],
   "author": {
-    "name" : "Styrelsen for Dataforsyning og Infrastruktur",
-    "email" : "support@sdfi.dk",
-    "url" : "https://sdfi.dk/"
+    "name": "Styrelsen for Dataforsyning og Infrastruktur",
+    "email": "support@sdfi.dk",
+    "url": "https://sdfi.dk/"
   },
   "license": "MIT",
   "bugs": {

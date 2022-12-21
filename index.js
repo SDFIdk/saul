@@ -5,7 +5,7 @@ export {
   world2image, // Deprecated. Use getImageXY
   getWorldXYZ,
   getImageXY,
-  getZ, // Deprecated. Use getElevation
+  getZ,
   iterate // Deprecated. Use getWorldXYZ
 } from './modules/saul-core.js'
 

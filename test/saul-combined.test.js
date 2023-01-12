@@ -1,7 +1,6 @@
-// You should add your own config.js with proper tokens, passwords, etc.
+// You should add your own config.js with proper tokens, etc.
 // Check config.js.example for info on how to set it up
 import auth from '../config.js'
-import assert from 'assert'
 import { getSTAC, getTerrainGeoTIFF,getZ, getWorldXYZ, getImageXY } from '../index.js'
 
 

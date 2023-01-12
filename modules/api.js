@@ -154,11 +154,11 @@ function post(url, requestbody, token) {
 /** 
  * API method to fetch data from DHM
  * @param {string} query - DHM API query. Find details at https://datafordeler.dk/dataoversigt/danmarks-hoejdemodel-dhm/koter/
- * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @param {{API_DHM_BASEURL: string, API_DHM_TOKENA: string, API_DHM_TOKENB: string}} auth - API autentication data. See ../config.js.example for reference.
  * @returns {object} Response data
  */
 function getDHM(query, auth) {
-  const auth_params = `&username=${auth.API_DHM_USERNAME}&password=${auth.API_DHM_PASSWORD}`
+  const auth_params = `&username=${auth.API_DHM_TOKENA}&password=${auth.API_DHM_TOKENB}`
   return get(encodeURI(auth.API_DHM_BASEURL + query + auth_params))
   .then((data) => data)
 }
@@ -197,7 +197,7 @@ async function consumeGeoTIFF(raw_data) {
 
 /** Fetches a GeoTIFF with elevation data matching the bounding box of a STAC API item (image)
  * @param {object} stac_item - STAC API item from a featureCollection request
- * @param {{API_DHM_WCS_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @param {{API_DHM_WCS_BASEURL: string, API_DHM_TOKENA: string, API_DHM_TOKENB: string}} auth - API autentication data. See ../config.js.example for reference.
  * @param {number} [resolution] - Resolution (1 - 0.01). Higher number means more pixels and better precision.
  * @returns {object} GeoTiff data
  */
@@ -210,7 +210,7 @@ function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05) {
   // GET request for DHM WCS data
   let url = auth.API_DHM_WCS_BASEURL
   url += '?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0'
-  url += `&username=${ auth.API_DHM_USERNAME }&password=${ auth.API_DHM_PASSWORD }` // TODO: Should be auth stuff
+  url += `&username=${ auth.API_DHM_TOKENA }&password=${ auth.API_DHM_TOKENB }`
   url += `&height=${ height }`
   url += `&width=${ width }`
   url += `&bbox=${ bbox[0]},${ bbox[1]},${ bbox[2]},${ bbox[3]}`

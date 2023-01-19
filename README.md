@@ -39,6 +39,11 @@ From within `node_modules/@dataforsyningen/saul` you can run the `test` command 
 npm run test
 ```
 
+## Publish NPM
+
+Create a new release in Github to publish an updated NPM package.
+Details are available in the "Npm" section of SDFI ITU's wiki.
+
 ## Acknowledgements
 
 SAUL is made available under the MIT license by

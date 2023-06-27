@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/SDFIdk/saul#readme",
   "devDependencies": {
-    "jsdoc": "^3.6.10"
+    "jsdoc": "^4.0.2"
   },
   "dependencies": {
     "geotiff": "^2.0.5",

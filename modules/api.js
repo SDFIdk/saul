@@ -95,7 +95,8 @@ function get(url, config = {}, is_json = true) {
     startLoading()
     return fetch( url, {
       ...config,
-      method: 'GET'
+      method: 'GET',
+      mode: 'cors'
     })
     .then((response) => {
       return HttpResponseHandler(response, is_json)

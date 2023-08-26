@@ -171,7 +171,7 @@ function getDHM(query, auth) {
  * @returns {object} Response data
  */
 function getSTAC(query, auth) {
-  return get(auth.API_STAC_BASEURL + query, {headers: {'token': auth.API_STAC_TOKEN}})
+  return get(auth.API_STAC_BASEURL + query + '&token=' + auth.API_STAC_TOKEN)
   .then((data) => data)
 }
 

@@ -166,12 +166,19 @@ function getDHM(query, auth) {
 
 /** 
  * API method to GET data from STAC API
- * @param {string} query - STAC API query.
+ * @param {string} query - STAC API query string. May include endpoint path information.
  * @param {{API_STAC_BASEURL: string, API_STAC_TOKEN: string}} auth - API autentication data. See ../config.js.example for reference.
  * @returns {object} Response data
  */
 function getSTAC(query, auth) {
-  return get(auth.API_STAC_BASEURL + query + '&token=' + auth.API_STAC_TOKEN)
+  let requestUrl = `${auth.API_STAC_BASEURL}${query}`
+  const queryStr = query.split('?')[1]
+  if (queryStr) {
+    requestUrl += `&token=${auth.API_STAC_TOKEN}`
+  } else {
+    requestUrl += `?token=${auth.API_STAC_TOKEN}`
+  }
+  return get(requestUrl)
   .then((data) => data)
 }
 

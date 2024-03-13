@@ -14,6 +14,7 @@ export {
   getSTAC,
   getDHM,
   getTerrainGeoTIFF,
+  getDenmarkGeoTiff,
   get,
   post
 } from './modules/api.js'

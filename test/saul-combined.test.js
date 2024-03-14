@@ -3,6 +3,9 @@
 import auth from '../config.js'
 import { getSTAC, getTerrainGeoTIFF,getZ, getWorldXYZ, getImageXY } from '../index.js'
 
+console.log('---------------')
+console.log('Combined tests ')
+console.log('---------------')
 
 // Vars
 const resolution = 0.005 // Higher number means more points and better precision

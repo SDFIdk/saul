@@ -4,6 +4,10 @@ import assert from 'assert'
 import proj4 from 'proj4'
 import {epsg25832proj, createTranslator} from '../index.js'
 
+console.log('----------------')
+console.log('Projection tests')
+console.log('----------------')
+
 // Test epsg25832proj
 try {
 

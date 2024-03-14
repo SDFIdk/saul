@@ -7,6 +7,10 @@ import auth from '../config.js'
 import assert from 'assert'
 import {getSTAC, world2image, image2world, getZ, iterate} from '../index.js'
 
+console.log('---------------')
+console.log('  Core tests   ')
+console.log('---------------')
+
 /*
 const item = await getSTAC('/collections/skraafotos2019/items/2019_83_37_2_0046_00001113', auth)
 const world_x = 580341

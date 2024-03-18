@@ -160,7 +160,7 @@ function post(url, requestbody, token) {
  */
 function getDHM(query, auth) {
   const auth_params = `&username=${auth.API_DHM_TOKENA}&password=${auth.API_DHM_TOKENB}`
-  return get(encodeURI(auth.API_DHM_BASEURL + query + auth_params))
+  return get(encodeURI(auth.API_DHM_BASEURL + query + auth_params), {cache: 'force-cache'})
   .then((data) => data)
 }
 

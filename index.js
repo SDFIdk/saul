@@ -25,5 +25,6 @@ export {
 } from './modules/saul-projection.js'
 
 export {
-  getElevation
+  getElevation,
+  visualizeGeotiff
 } from './modules/saul-elevation.js'

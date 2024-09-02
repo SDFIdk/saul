@@ -1,9 +1,9 @@
 import auth from '../config.js'
-import { getElevation } from '../modules/saul-elevation.js'
+import { getElevation, visualizeGeotiff } from '../modules/saul-elevation.js'
 import { getImageXY, getWorldXYZ } from '../modules/saul-core.js'
 import { getDenmarkGeoTiff } from '../modules/api.js'
 
-const geoTiffResoluation = 100
+const geoTiffResoluation = 50
 
 const worldxy = [533344, 6172951] // World XY Point in all images near Vejle
 const image1xy = [8566,4105] // Point/Image XY in `image1`
@@ -42,27 +42,6 @@ function fetchImageData(imageId) {
   .then((data) => {
     return data.features[0]
   })
-}
-
-async function visualizeGeotiff(gTiff) {
-
-  console.log('--- GTIFF visualization ---')
-  //console.log(gTiff, gTiff.getHeight(), gTiff.getWidth())
-  const float32Arr = await gTiff.readRasters()
-  const tiffWidth = gTiff.getWidth()
-  const rasters = float32Arr[0]
-  let lines = []
-  let line = ''
-  for (let i = 0; i < rasters.length; i++) {
-    if (i % tiffWidth === 0) {
-      lines.push(line)
-      line = ''
-    }
-    line += ' ' + Math.abs(rasters[i]).toFixed(0).substring(0,1)
-  }
-  for (const l of lines) {
-    console.log(l)
-  }
 }
 
 console.log('-------------------------------------------------------')

@@ -49,7 +49,45 @@ async function getElevation(lat, lon, geoTiff) {
   return Math.round(elevation_data[0][0])
 }
 
+/** Creates an ASCII visualization of a GeoTiff with elevation data. Useful for display in a terminal.
+ * NOTE: You may want to downsmaple the GeoTiff to fit within your terminal window. A GeoTiff pixel is represented by 3 characters each.
+ * @param {object} gTiff - GeoTiff data output from getTerrainGeoTIFF() or getDenmarkGeoTiff() method
+ */
+async function visualizeGeotiff(gTiff) {
+  console.log('--- GTIFF visualization ---')
+  //console.log(gTiff, gTiff.getHeight(), gTiff.getWidth())
+  const float32Arr = await gTiff.readRasters()
+  const tiffWidth = gTiff.getWidth()
+  const rasters = float32Arr[0]
+  let lines = []
+  let line = ''
+  for (let i = 0; i < rasters.length; i++) {
+    if (i % tiffWidth === 0) {
+      lines.push(line)
+      line = ''
+    }
+    line += zeroPadNumber(rasters[i])
+  }
+  for (const l of lines) {
+    console.log(l)
+  }
+}
+
+function zeroPadNumber(input) {
+  if (input === 0) {
+      return "..."
+  } else if (input < 0) {
+      return `0${input.toFixed(0)}`
+  } else if (input < 10) {
+      return `00${Math.floor(input)}`
+  } else if (input < 100) {
+      return `0${Math.floor(input)}`
+  } else {
+      return `${Math.floor(input)}`
+  }
+}
+
 export {
-  getTerrainGeoTIFF,
-  getElevation
+  getElevation,
+  visualizeGeotiff
 }

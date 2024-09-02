@@ -25,25 +25,28 @@ function constrainToBbox(bbox, x, y) {
  * @param {object} geoTiff - GeoTiff data output from getTerrainGeoTIFF() method
  * @returns {number} Elevation in meters 
  */
-async function getElevation(x, y, geoTiff) {
-  
+async function getElevation(lat, lon, geoTiff) {
+
   const bbox = geoTiff.getBoundingBox()
   const height = geoTiff.getHeight()
   const width = geoTiff.getWidth()
   const bboxWidth = bbox[2] - bbox[0]
   const bboxHeight = bbox[3] - bbox[1]
 
-  const xy = constrainToBbox(bbox, x, y)
+  const [x,y] = constrainToBbox(bbox, lat, lon)
 
-  const widthPct = ( xy[0] - bbox[0] ) / bboxWidth
-  const heightPct = ( xy[1] - bbox[1] ) / bboxHeight
+  const widthPct = ( x - bbox[0] ) / bboxWidth
+  const heightPct = ( y - bbox[1] ) / bboxHeight
   const xPx = Math.floor( width * widthPct )
   const yPx = Math.floor( height * ( 1 - heightPct ) )
 
   const window = [ xPx, yPx, xPx + 1, yPx + 1 ]
-  const elevation_data = await geoTiff.readRasters( {window} )
+  const elevation_data = await geoTiff.readRasters({
+    window: window, 
+    fillValue: 0
+  })
 
-  return Math.round( elevation_data[0][0] * 10) / 10
+  return Math.round(elevation_data[0][0])
 }
 
 export {

@@ -5,6 +5,10 @@ import auth from '../config.js'
 import assert from 'assert'
 import { getElevation, get, getTerrainGeoTIFF, getZ, getWorldXYZ, world2image } from '../index.js'
 
+console.log('---------------')
+console.log('Elevation tests')
+console.log('---------------')
+
 // Vars
 const stac_item = '2021_83_29_2_0019_00003995'
 const fidelity = 0.03 // Higher number means more points and better precision

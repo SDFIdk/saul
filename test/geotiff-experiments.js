@@ -1,13 +1,9 @@
 import auth from '../config.js'
-import { fromArrayBuffer } from 'geotiff'
 import { getElevation } from '../modules/saul-elevation.js'
-import { image2world, getImageXY, getWorldXYZ } from '../modules/saul-core.js'
+import { getImageXY, getWorldXYZ } from '../modules/saul-core.js'
 import { getDenmarkGeoTiff } from '../modules/api.js'
 
-import assert from 'assert'
-
-const API_DHM_TOKENA = "QKJBQATHVS"
-const API_DHM_TOKENB = "ytxCA8UGM5n0Z*zi"
+const geoTiffResoluation = 100
 
 const worldxy = [533344, 6172951] // World XY Point in all images near Vejle
 const image1xy = [8566,4105] // Point/Image XY in `image1`
@@ -31,7 +27,7 @@ const pointø = [892999, 6147725] // Christians Ø
 const pointv = [441977, 6157385] // Blåvands hug
 
 function fetchKote(worldXY) {
-  return fetch(`https://services.datafordeler.dk/DHMTerraen/DHMKoter/1.0.0/GEOREST/HentKoter?geop=POINT(${worldXY[0]} ${worldXY[1]})&elevationmodel=dtm&username=${API_DHM_TOKENA}&password=${API_DHM_TOKENB}`)
+  return fetch(`https://services.datafordeler.dk/DHMTerraen/DHMKoter/1.0.0/GEOREST/HentKoter?geop=POINT(${worldXY[0]} ${worldXY[1]})&elevationmodel=dtm&username=${auth.API_DHM_TOKENA}&password=${auth.API_DHM_TOKENB}`)
   .then((response) => {
     return response.json()
   })
@@ -46,6 +42,27 @@ function fetchImageData(imageId) {
   .then((data) => {
     return data.features[0]
   })
+}
+
+async function visualizeGeotiff(gTiff) {
+
+  console.log('--- GTIFF visualization ---')
+  //console.log(gTiff, gTiff.getHeight(), gTiff.getWidth())
+  const float32Arr = await gTiff.readRasters()
+  const tiffWidth = gTiff.getWidth()
+  const rasters = float32Arr[0]
+  let lines = []
+  let line = ''
+  for (let i = 0; i < rasters.length; i++) {
+    if (i % tiffWidth === 0) {
+      lines.push(line)
+      line = ''
+    }
+    line += ' ' + Math.abs(rasters[i]).toFixed(0).substring(0,1)
+  }
+  for (const l of lines) {
+    console.log(l)
+  }
 }
 
 console.log('-------------------------------------------------------')
@@ -64,7 +81,7 @@ It should
 - should compare worldxyz 1 z and worldxyz 2 z and kote
 */
 
-const DKGeoTiff = await getDenmarkGeoTiff(auth, 500)
+const DKGeoTiff = await getDenmarkGeoTiff(auth, geoTiffResoluation)
 const imgData0 = await fetchImageData(image0)
 const imgData1 = await fetchImageData(image1)
 const imgData2 = await fetchImageData(image2)
@@ -175,3 +192,5 @@ console.table({
 })
 
 console.log('got DKGeotiff', (DKGeoTiff.source.arrayBuffer.byteLength / 1024), 'Kb')
+
+visualizeGeotiff(DKGeoTiff)

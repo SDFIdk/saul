@@ -22,7 +22,7 @@ function constrainToBbox(bbox, x, y) {
  * Heavily inspired by https://towardsdatascience.com/geotiff-coordinate-querying-with-javascript-5e6caaaf88cf
  * @param {number} x - EPSG:25832 X coordinate
  * @param {number} y - EPSG:25832 Y coordinate
- * @param {object} geoTiff - GeoTiff data output from getTerrainGeoTIFF() method
+ * @param {object} geoTiff - GeoTiff data output from getTerrainGeoTIFF() or getDenmarkGeoTiff() method
  * @returns {number} Elevation in meters 
  */
 async function getElevation(lat, lon, geoTiff) {

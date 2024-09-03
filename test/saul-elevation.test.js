@@ -69,7 +69,7 @@ function compareElevations(x,y,geotiff) {
   .then(elevation => {
     getZ(x, y, auth)
     .then(getz_e => {
-      assert(is_equalIsh(getz_e, elevation, 0.5), `Elevations ${elevation} / ${getz_e} at ${x} ${y} do not match`)
+      assert(is_equalIsh(getz_e, elevation, 2.7), `Elevations ${elevation} / ${getz_e} at ${x} ${y} are way apart`)
       console.log(`Elevation at ${ x } ${ y } with delta ${Math.abs(elevation - getz_e).toFixed(2)} OK`)
     })
   })

@@ -1,9 +1,9 @@
 import auth from '../config.js'
 import { getElevation, visualizeGeotiff } from '../modules/saul-elevation.js'
 import { getImageXY, getWorldXYZ } from '../modules/saul-core.js'
-import { getDenmarkGeoTiff } from '../modules/api.js'
+import { getDenmarkGeoTiff, consumeGeoTIFF } from '../modules/api.js'
 
-const geoTiffResoluation = 70
+const geoTiffResolution = 1000
 
 const worldxy = [533344, 6172951] // World XY Point in all images near Vejle
 const image1xy = [8566,4105] // Point/Image XY in `image1`
@@ -44,6 +44,17 @@ function fetchImageData(imageId) {
   })
 }
 
+function fetchDKTerrainFile(url) {
+  return fetch(url)
+  .then(response => response.arrayBuffer())
+  .then(arrayBuffer => consumeGeoTIFF(arrayBuffer))
+}
+
+/*
+ * Example request to get terrain data for all of DK
+ * https://services.datafordeler.dk/DHMNedboer/dhm_wcs/1.0.0/WCS?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0&username=QKJBQATHVS&password=ytxCA8UGM5n0Z*zi&height=1000&width=1000&bbox=430000,6040000,900000,6413000
+ */
+
 console.log('-------------------------------------------------------')
 console.log('-- Experiments with pan-Danish GeoTiff terrain model --')
 console.log('-------------------------------------------------------')
@@ -60,7 +71,15 @@ It should
 - should compare worldxyz 1 z and worldxyz 2 z and kote
 */
 
-const DKGeoTiff = await getDenmarkGeoTiff(auth, geoTiffResoluation)
+// Get GTiff from API
+// const DKGeoTiff = await getDenmarkGeoTiff(auth, geoTiffResolution)
+
+// Get big GTiff
+const DKGeoTiff = await fetchDKTerrainFile('http://localhost:7701/dk-terrain.tiff')
+
+// Get tiny GTiff
+//const DKGeoTiff = await fetchDKTerrainFile('http://localhost:7701/tiny-dk-terrain.tiff')
+
 const imgData0 = await fetchImageData(image0)
 const imgData1 = await fetchImageData(image1)
 const imgData2 = await fetchImageData(image2)
@@ -97,6 +116,32 @@ const calcdWorldXYZ0 = await getWorldXYZ({
   image: imgData0, 
   terrain: DKGeoTiff
 })
+const calcdImageXY10 = getImageXY(imgData1, ...calcdWorldXYZ0)
+const calcdWorldXYZ10 = await getWorldXYZ({
+  xy: calcdImageXY10, 
+  image: imgData1, 
+  terrain: DKGeoTiff
+})
+
+function getRandomPoint() {
+  const bbox = [430000,6040000,900000,6413000]
+  const width = bbox[2] - bbox[0]
+  const height = bbox[3] - bbox[1]
+  const randomX = bbox[0] + (Math.random() * width)
+  const randomY = bbox[1] + (Math.random() * height)
+  return [randomX, randomY]
+}
+
+const randomPoint1 = getRandomPoint()
+const randomPoint2 = getRandomPoint()
+const randomPoint3 = getRandomPoint()
+const randomPoint4 = getRandomPoint()
+const randomPoint5 = getRandomPoint()
+const randomPoint6 = getRandomPoint()
+const randomPoint7 = getRandomPoint()
+const randomPoint8 = getRandomPoint()
+const randomPoint9 = getRandomPoint()
+const randomPoint10 = getRandomPoint()
 
 console.log('From origin, use world coordinate to calculate image coordinate.')
 console.log('Then uses that image coordinate to calculate world coordinate and feed it into the next image calculations.')
@@ -106,7 +151,8 @@ console.table({
   image2: {worldxyz: calcdWorldXYZ2, imagexy: calcdImageXY2},
   image3: {worldxyz: calcdWorldXYZ3, imagexy: calcdImageXY3},
   image4: {worldxyz: calcdWorldXYZ4, imagexy: calcdImageXY4},
-  image0: {worldxyz: calcdWorldXYZ0, imagexy: calcdImageXY0}
+  image0: {worldxyz: calcdWorldXYZ0, imagexy: calcdImageXY0},
+  back_to_image1: {worldxyz: calcdWorldXYZ10, imagexy: calcdImageXY10}
 })
 
 console.log('Using image px coordinate to calculate a world coordinate and back again.')
@@ -162,9 +208,49 @@ console.table({
   'Chr. Ø': {
     kote: await fetchKote(pointø),
     gtiff: await getElevation(...pointø, DKGeoTiff)
+  },
+  'Random 1': {
+    kote: await fetchKote(randomPoint1),
+    gtiff: await getElevation(...randomPoint1, DKGeoTiff)
+  },
+  'Random 2': {
+    kote: await fetchKote(randomPoint2),
+    gtiff: await getElevation(...randomPoint2, DKGeoTiff)
+  },
+  'Random 3': {
+    kote: await fetchKote(randomPoint3),
+    gtiff: await getElevation(...randomPoint3, DKGeoTiff)
+  },
+  'Random 4': {
+    kote: await fetchKote(randomPoint4),
+    gtiff: await getElevation(...randomPoint4, DKGeoTiff)
+  },
+  'Random 5': {
+    kote: await fetchKote(randomPoint5),
+    gtiff: await getElevation(...randomPoint5, DKGeoTiff)
+  },
+  'Random 6': {
+    kote: await fetchKote(randomPoint6),
+    gtiff: await getElevation(...randomPoint6, DKGeoTiff)
+  },
+  'Random 7': {
+    kote: await fetchKote(randomPoint7),
+    gtiff: await getElevation(...randomPoint7, DKGeoTiff)
+  },
+  'Random 8': {
+    kote: await fetchKote(randomPoint8),
+    gtiff: await getElevation(...randomPoint8, DKGeoTiff)
+  },
+  'Random 9': {
+    kote: await fetchKote(randomPoint9),
+    gtiff: await getElevation(...randomPoint9, DKGeoTiff)
+  },
+  'Random 10': {
+    kote: await fetchKote(randomPoint10),
+    gtiff: await getElevation(...randomPoint10, DKGeoTiff)
   }
 })
 
-visualizeGeotiff(DKGeoTiff)
-
 console.log('got DKGeotiff', (DKGeoTiff.source.arrayBuffer.byteLength / 1024), 'Kb', pointø)
+
+//visualizeGeotiff(DKGeoTiff)

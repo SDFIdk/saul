@@ -1,9 +1,13 @@
-/**  Maps a coordinate from the one coordinate system to another  */
-function convertCoordinate(coord, bbox1, bbox2) {
+/**  
+ * Maps a coordinate from the one coordinate system to another based on GeoTiff image dimensions.
+ * @param {Array} coord - EPSG:25832 X,Y coordinate pair
+ * @param {Array} bbox - Bounding box within input coordinate systtem. Consists of 2 EPSG:25832 coordinate pairs. Example: [x1,y1,x2,y2]
+ * @param {Array} imageDimensions - Width and height of a GeoTiff image. This will set the bounding box of the output coordinate system. Note: This coordinate system will have 0,0 set in the top right position of the image.
+ */
+function convertCoordinate(coord, bbox1, imageDimensions) {
   
   // Extract the coordinates from the bounding boxes
   const [x1_min, y1_min, x1_max, y1_max] = bbox1
-  const [x2_min, y2_min, x2_max, y2_max] = bbox2
 
   // Extract the coordinate to convert
   const [x1, y1] = coord
@@ -11,24 +15,22 @@ function convertCoordinate(coord, bbox1, bbox2) {
   // Calculate the width and height of both bounding boxes
   const width1 = x1_max - x1_min
   const height1 = y1_max - y1_min
-  const width2 = x2_max - x2_min
-  const height2 = y2_max - y2_min
+  const width2 = imageDimensions[0]
+  const height2 = imageDimensions[1]
 
   // Calculate the relative position in the first coordinate system
   const x_relative = (x1 - x1_min) / width1
   const y_relative = (y1 - y1_min) / height1
 
-  console.log('ratios', (x_relative * width2), (y_relative * height2), x2_min, y2_min)
-
   // Calculate the new position in the second coordinate system
-  const x2 = x2_min + Math.abs(x_relative * width2);
-  const y2 = y2_min + Math.abs(y_relative * height2);
+  const x2 = Math.abs(x_relative * width2)
+  const y2 = height2 - Math.abs(y_relative * height2)
 
-  return [x2, y2];
+  return [x2, y2]
 }
 
-/** Calculates nearest elevation for given coordinate using geoTIFF terrain data
- * Heavily inspired by https://towardsdatascience.com/geotiff-coordinate-querying-with-javascript-5e6caaaf88cf
+/** 
+ * Calculates nearest elevation for given coordinate using geoTIFF terrain data
  * @param {number} x - EPSG:25832 X coordinate
  * @param {number} y - EPSG:25832 Y coordinate
  * @param {object} geoTiff - GeoTiff data output from getTerrainGeoTIFF() or getDenmarkGeoTiff() method
@@ -41,18 +43,22 @@ async function getElevation(x, y, geoTiff) {
   const width = geoTiff.getWidth()
 
   // Convert lat/lon to geotiff x/y
-  const [xPx, yPx] = convertCoordinate([x,y], bbox, [0,0, width, height])
-
-  // Fetch window of values around x/y
-
-  // Interpolate elevation value of x/y in relation to window values
-
-  const window = [ xPx, yPx, xPx + 1, yPx + 1 ]
+  const [xPx, yPx] = convertCoordinate([x,y], bbox, [width, height])
+ 
+  // Fetch window of raster values around x/y
+  const window = [
+    Math.floor(xPx), 
+    Math.floor(yPx),
+    Math.ceil(xPx),
+    Math.ceil(yPx)
+  ]
+  
+  // Fetch elevation value from geoTiff rasters
   const elevation_data = await geoTiff.readRasters({
     window: window,
     fillValue: 0
   })
-
+  
   return elevation_data[0][0]
 }
 
@@ -79,6 +85,7 @@ async function visualizeGeotiff(gTiff) {
   }
 }
 
+/** Converts numbers to strings in a 3-letter format. Ex. `002`, `0-3` (for negative numbers), or `123` */
 function zeroPadNumber(input) {
   if (input === 0) {
       return "..."

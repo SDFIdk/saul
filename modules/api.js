@@ -255,5 +255,6 @@ export {
   postSTAC,
   getDHM,
   getTerrainGeoTIFF,
-  getDenmarkGeoTiff
+  getDenmarkGeoTiff,
+  consumeGeoTIFF
 }

@@ -89,9 +89,11 @@ function is_equalIsh(num1, num2, deviation = max_deviation) {
     return true
   }
 }
+
 function generateSTACurl(stac_item_id) {
   return `/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&ids=${ stac_item_id }`
 }
+
 async function enrichData(item) {
   let new_item = Object.assign({}, item)
   // add STAC item

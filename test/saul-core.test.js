@@ -68,7 +68,7 @@ try {
   let xy = world2image(item, world_x, world_y, world_elevation)
 
   assert(is_equalIsh(xy[0], image_x, 1), `world2image fail: The x coordinate values ${xy[0]} ${image_x} are not equal`)
-  assert(is_equalIsh(xy[1], image_y), "world2image fail: The y coordinate values are not equal")
+  assert(is_equalIsh(xy[1], image_y, 1), `world2image fail: The y coordinate values ${xy[1]} ${image_y} are not equal`)
   
   console.log("Test world2image OK")
 

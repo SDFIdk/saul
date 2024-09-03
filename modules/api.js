@@ -240,12 +240,22 @@ function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05, sizeX = 300) {
 
 /**
  * Fetches a geoTIFF with elevation data covering all of Denmark
- * @param {*} auth - API autentication data. See ../config.js.example for reference.
- * @param {*} size - Size (width and height) of the returned geoTiff image
+ * @param {Object} options
+ * @param {Object} options.src - URL to download a pre-generated GeoTiff.
+ * @param {Object} options.auth - API autentication data. See ../config.js.example for reference.
+ * @param {Array} options.size - Size (width and height) of the geoTiff image to return
  * @returns GeoTIFF raster with elevation data
  */
-function getDenmarkGeoTiff(auth, size = 300) {
-  return getTerrainGeoTIFF({bbox: [430000,6040000,900000,6413000]}, auth, null, size)
+function getDenmarkGeoTiff(options) {
+  if (options.src) {
+    return fetch(options.src)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => consumeGeoTIFF(arrayBuffer))
+  } else {
+    const auth = options.auth
+    const size = options.size ? options.size : 1000
+    return getTerrainGeoTIFF({bbox: [430000,6040000,900000,6413000]}, auth, null, size)
+  }
 }
 
 export {

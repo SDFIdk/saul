@@ -44,12 +44,6 @@ function fetchImageData(imageId) {
   })
 }
 
-function fetchDKTerrainFile(url) {
-  return fetch(url)
-  .then(response => response.arrayBuffer())
-  .then(arrayBuffer => consumeGeoTIFF(arrayBuffer))
-}
-
 /*
  * Example request to get terrain data for all of DK
  * https://services.datafordeler.dk/DHMNedboer/dhm_wcs/1.0.0/WCS?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0&username=QKJBQATHVS&password=ytxCA8UGM5n0Z*zi&height=1000&width=1000&bbox=430000,6040000,900000,6413000
@@ -72,13 +66,13 @@ It should
 */
 
 // Get GTiff from API
-// const DKGeoTiff = await getDenmarkGeoTiff(auth, geoTiffResolution)
+// const DKGeoTiff = await getDenmarkGeoTiff({auth: auth, size: geoTiffResolution})
 
 // Get big GTiff
-const DKGeoTiff = await fetchDKTerrainFile('http://localhost:7701/dk-terrain.tiff')
+const DKGeoTiff = await getDenmarkGeoTiff({src: 'http://localhost:7701/dk-terrain.tiff'})
 
 // Get tiny GTiff
-//const DKGeoTiff = await fetchDKTerrainFile('http://localhost:7701/tiny-dk-terrain.tiff')
+//const DKGeoTiff = await getDenmarkGeoTiff({src: 'http://localhost:7701/tiny-dk-terrain.tiff'})
 
 const imgData0 = await fetchImageData(image0)
 const imgData1 = await fetchImageData(image1)

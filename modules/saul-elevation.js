@@ -1,21 +1,30 @@
-import { getTerrainGeoTIFF } from './api.js'
+/**  Maps a coordinate from the one coordinate system to another  */
+function convertCoordinate(coord, bbox1, bbox2) {
+  
+  // Extract the coordinates from the bounding boxes
+  const [x1_min, y1_min, x1_max, y1_max] = bbox1
+  const [x2_min, y2_min, x2_max, y2_max] = bbox2
 
+  // Extract the coordinate to convert
+  const [x1, y1] = coord
 
-/** Constrain coordinates to be within a bounding box */
-function constrainToBbox(bbox, x, y) {
-  let new_x = x
-  let new_y = y
-  if (x < bbox[0]) {
-    new_x = bbox[0] + 1
-  } else if (bbox[2] < x) {
-    new_x = bbox[2] - 1
-  }
-  if (y < bbox[1]) {
-    new_y = bbox[1] + 1
-  } else if (bbox[3] < y) {
-    new_y = bbox[3] - 1
-  }
-  return [new_x, new_y]
+  // Calculate the width and height of both bounding boxes
+  const width1 = x1_max - x1_min
+  const height1 = y1_max - y1_min
+  const width2 = x2_max - x2_min
+  const height2 = y2_max - y2_min
+
+  // Calculate the relative position in the first coordinate system
+  const x_relative = (x1 - x1_min) / width1
+  const y_relative = (y1 - y1_min) / height1
+
+  console.log('ratios', (x_relative * width2), (y_relative * height2), x2_min, y2_min)
+
+  // Calculate the new position in the second coordinate system
+  const x2 = x2_min + Math.abs(x_relative * width2);
+  const y2 = y2_min + Math.abs(y_relative * height2);
+
+  return [x2, y2];
 }
 
 /** Calculates nearest elevation for given coordinate using geoTIFF terrain data
@@ -25,37 +34,34 @@ function constrainToBbox(bbox, x, y) {
  * @param {object} geoTiff - GeoTiff data output from getTerrainGeoTIFF() or getDenmarkGeoTiff() method
  * @returns {number} Elevation in meters 
  */
-async function getElevation(lat, lon, geoTiff) {
+async function getElevation(x, y, geoTiff) {
 
   const bbox = geoTiff.getBoundingBox()
   const height = geoTiff.getHeight()
   const width = geoTiff.getWidth()
-  const bboxWidth = bbox[2] - bbox[0]
-  const bboxHeight = bbox[3] - bbox[1]
 
-  const [x,y] = constrainToBbox(bbox, lat, lon)
+  // Convert lat/lon to geotiff x/y
+  const [xPx, yPx] = convertCoordinate([x,y], bbox, [0,0, width, height])
 
-  const widthPct = ( x - bbox[0] ) / bboxWidth
-  const heightPct = ( y - bbox[1] ) / bboxHeight
-  const xPx = Math.floor( width * widthPct )
-  const yPx = Math.floor( height * ( 1 - heightPct ) )
+  // Fetch window of values around x/y
+
+  // Interpolate elevation value of x/y in relation to window values
 
   const window = [ xPx, yPx, xPx + 1, yPx + 1 ]
   const elevation_data = await geoTiff.readRasters({
-    window: window, 
+    window: window,
     fillValue: 0
   })
 
-  return Math.round(elevation_data[0][0])
+  return elevation_data[0][0]
 }
 
-/** Creates an ASCII visualization of a GeoTiff with elevation data. Useful for display in a terminal.
- * NOTE: You may want to downsmaple the GeoTiff to fit within your terminal window. A GeoTiff pixel is represented by 3 characters each.
- * @param {object} gTiff - GeoTiff data output from getTerrainGeoTIFF() or getDenmarkGeoTiff() method
+/** Creates an ASCII visualization of a terrain GeoTiff. Useful for display in a terminal.
+ * NOTE: You may want to use a downsmapled GeoTiff to fit within your terminal window. A GeoTiff pixel is represented by 3 characters each.
+ * @param {object} gTiff - GeoTiff output from getTerrainGeoTIFF() or getDenmarkGeoTiff() method
  */
 async function visualizeGeotiff(gTiff) {
   console.log('--- GTIFF visualization ---')
-  //console.log(gTiff, gTiff.getHeight(), gTiff.getWidth())
   const float32Arr = await gTiff.readRasters()
   const tiffWidth = gTiff.getWidth()
   const rasters = float32Arr[0]

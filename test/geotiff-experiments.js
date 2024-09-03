@@ -3,7 +3,7 @@ import { getElevation, visualizeGeotiff } from '../modules/saul-elevation.js'
 import { getImageXY, getWorldXYZ } from '../modules/saul-core.js'
 import { getDenmarkGeoTiff } from '../modules/api.js'
 
-const geoTiffResoluation = 50
+const geoTiffResoluation = 70
 
 const worldxy = [533344, 6172951] // World XY Point in all images near Vejle
 const image1xy = [8566,4105] // Point/Image XY in `image1`
@@ -98,8 +98,8 @@ const calcdWorldXYZ0 = await getWorldXYZ({
   terrain: DKGeoTiff
 })
 
-const kote = await fetchKote([calcdWorldXYZ0[0], calcdWorldXYZ0[1]])
-
+console.log('From origin, use world coordinate to calculate image coordinate.')
+console.log('Then uses that image coordinate to calculate world coordinate and feed it into the next image calculations.')
 console.table({
   origins: {worldxyz: worldxy, imagexy: image1xy},
   image1: {worldxyz: calcdWorldXYZ1, imagexy: image1xy},
@@ -109,13 +109,7 @@ console.table({
   image0: {worldxyz: calcdWorldXYZ0, imagexy: calcdImageXY0}
 })
 
-console.table({
-  elevations: {
-    kote: kote,
-    gtiff: calcdWorldXYZ0[2]
-  }
-})
-
+console.log('Using image px coordinate to calculate a world coordinate and back again.')
 console.table({
   imageXY: {
     original: [8566,4105],
@@ -123,6 +117,7 @@ console.table({
   }
 })
 
+console.log('Samle elevations fetched from kote API or calculated from GeoTiff:')
 console.table({
   'Rådhuspladsen': {
     kote: await fetchKote(point1),
@@ -170,6 +165,6 @@ console.table({
   }
 })
 
-console.log('got DKGeotiff', (DKGeoTiff.source.arrayBuffer.byteLength / 1024), 'Kb')
-
 visualizeGeotiff(DKGeoTiff)
+
+console.log('got DKGeotiff', (DKGeoTiff.source.arrayBuffer.byteLength / 1024), 'Kb', pointø)

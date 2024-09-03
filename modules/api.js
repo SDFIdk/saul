@@ -245,7 +245,7 @@ function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05, sizeX = 300) {
  * @returns GeoTIFF raster with elevation data
  */
 function getDenmarkGeoTiff(auth, size = 300) {
-  return getTerrainGeoTIFF({bbox: [425000,6030000,910000,6415000]}, auth, null, size)
+  return getTerrainGeoTIFF({bbox: [430000,6040000,900000,6413000]}, auth, null, size)
 }
 
 export {

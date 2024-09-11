@@ -202,8 +202,8 @@ async function compareZ(options) {
   const delta = Math.abs(world_xyz[2] - options.z)
   
   // Check delta vs. limit. If the difference is too big, try building coordinates with the new z
-  // Make sure the recursive loop ends at some point (iteration = 10) even if no precise z is found
-  if (options.iteration < 10 && delta > options.limit) {
+  // Make sure the recursive loop ends after 20 iterations even if no precise z is found
+  if (options.iteration < 20 && delta > options.limit) {
     options.iteration++
     options.z = world_xyz[2]
     return compareZ(options)

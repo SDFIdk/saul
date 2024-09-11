@@ -243,7 +243,7 @@ function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05, sizeX = 300) {
  * @param {Object} options
  * @param {Object} options.src - URL to download a pre-generated GeoTiff.
  * @param {Object} options.auth - API autentication data. See ../config.js.example for reference.
- * @param {Array} options.size - Size (width and height) of the geoTiff image to return
+ * @param {Number} options.size - Width of the geoTiff image to return
  * @returns GeoTIFF raster with elevation data
  */
 function getDenmarkGeoTiff(options) {

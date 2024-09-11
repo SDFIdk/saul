@@ -3,6 +3,9 @@
 import auth from '../config.js'
 import { getSTAC, getTerrainGeoTIFF,getZ, getWorldXYZ, getImageXY } from '../index.js'
 
+console.log('---------------')
+console.log('Combined tests ')
+console.log('---------------')
 
 // Vars
 const resolution = 0.005 // Higher number means more points and better precision
@@ -86,9 +89,11 @@ function is_equalIsh(num1, num2, deviation = max_deviation) {
     return true
   }
 }
+
 function generateSTACurl(stac_item_id) {
   return `/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&ids=${ stac_item_id }`
 }
+
 async function enrichData(item) {
   let new_item = Object.assign({}, item)
   // add STAC item

@@ -14,6 +14,7 @@ export {
   getSTAC,
   getDHM,
   getTerrainGeoTIFF,
+  getDenmarkGeoTiff,
   get,
   post
 } from './modules/api.js'
@@ -24,5 +25,6 @@ export {
 } from './modules/saul-projection.js'
 
 export {
-  getElevation
+  getElevation,
+  visualizeGeotiff
 } from './modules/saul-elevation.js'

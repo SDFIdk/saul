@@ -7,6 +7,10 @@ import auth from '../config.js'
 import assert from 'assert'
 import {getSTAC, world2image, image2world, getZ, iterate} from '../index.js'
 
+console.log('---------------')
+console.log('  Core tests   ')
+console.log('---------------')
+
 /*
 const item = await getSTAC('/collections/skraafotos2019/items/2019_83_37_2_0046_00001113', auth)
 const world_x = 580341
@@ -64,7 +68,7 @@ try {
   let xy = world2image(item, world_x, world_y, world_elevation)
 
   assert(is_equalIsh(xy[0], image_x, 1), `world2image fail: The x coordinate values ${xy[0]} ${image_x} are not equal`)
-  assert(is_equalIsh(xy[1], image_y), "world2image fail: The y coordinate values are not equal")
+  assert(is_equalIsh(xy[1], image_y, 1), `world2image fail: The y coordinate values ${xy[1]} ${image_y} are not equal`)
   
   console.log("Test world2image OK")
 

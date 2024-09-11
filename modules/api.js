@@ -1,5 +1,5 @@
 /**
- * SAUL API utilities 
+ * SAUL API utilities
  */
 
 import { fromArrayBuffer } from 'geotiff'
@@ -202,6 +202,11 @@ async function consumeGeoTIFF(raw_data) {
   return image
 }
 
+function calcSizeRatio(sizeX, bbox) {
+  const ratio = ( bbox[0] - bbox[2] ) / ( bbox[1] - bbox[3] )
+  return Math.round(sizeX * ratio)
+}
+
 
 /** Fetches a GeoTIFF with elevation data matching the bounding box of a STAC API item (image)
  * @param {object} stac_item - STAC API item from a featureCollection request
@@ -209,11 +214,12 @@ async function consumeGeoTIFF(raw_data) {
  * @param {number} [resolution] - Resolution (1 - 0.01). Higher number means more pixels and better precision.
  * @returns {object} GeoTiff data
  */
-function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05) {
+function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05, sizeX = 300) {
   
   const bbox = stac_item.bbox
-  const width = Math.round( stac_item.properties['proj:shape'][0] * resolution )
-  const height = Math.round( stac_item.properties['proj:shape'][1] * resolution )
+  const sizeY = calcSizeRatio(sizeX, stac_item.bbox)
+  const width = stac_item.properties ? Math.round( stac_item.properties['proj:shape'][0] * resolution ) : sizeX
+  const height = stac_item.properties ? Math.round( stac_item.properties['proj:shape'][1] * resolution ) : sizeY
 
   // GET request for DHM WCS data
   let url = auth.API_DHM_WCS_BASEURL
@@ -232,6 +238,25 @@ function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05) {
   })
 }
 
+/**
+ * Fetches a geoTIFF with elevation data covering all of Denmark
+ * @param {Object} options
+ * @param {Object} options.src - URL to download a pre-generated GeoTiff.
+ * @param {Object} options.auth - API autentication data. See ../config.js.example for reference.
+ * @param {Number} options.size - Width of the geoTiff image to return
+ * @returns GeoTIFF raster with elevation data
+ */
+function getDenmarkGeoTiff(options) {
+  if (options.src) {
+    return fetch(options.src)
+    .then(response => response.arrayBuffer())
+    .then(arrayBuffer => consumeGeoTIFF(arrayBuffer))
+  } else {
+    const auth = options.auth
+    const size = options.size ? options.size : 1000
+    return getTerrainGeoTIFF({bbox: [430000,6040000,900000,6413000]}, auth, null, size)
+  }
+}
 
 export {
   get,
@@ -239,5 +264,7 @@ export {
   getSTAC,
   postSTAC,
   getDHM,
-  getTerrainGeoTIFF
+  getTerrainGeoTIFF,
+  getDenmarkGeoTiff,
+  consumeGeoTIFF
 }

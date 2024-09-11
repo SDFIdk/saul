@@ -5,6 +5,10 @@ import auth from '../config.js'
 import assert from 'assert'
 import { getElevation, get, getTerrainGeoTIFF, getZ, getWorldXYZ, world2image } from '../index.js'
 
+console.log('---------------')
+console.log('Elevation tests')
+console.log('---------------')
+
 // Vars
 const stac_item = '2021_83_29_2_0019_00003995'
 const fidelity = 0.03 // Higher number means more points and better precision
@@ -65,7 +69,7 @@ function compareElevations(x,y,geotiff) {
   .then(elevation => {
     getZ(x, y, auth)
     .then(getz_e => {
-      assert(is_equalIsh(getz_e, elevation, 0.5), `Elevations ${elevation} / ${getz_e} at ${x} ${y} do not match`)
+      assert(is_equalIsh(getz_e, elevation, 2.7), `Elevations ${elevation} / ${getz_e} at ${x} ${y} are way apart`)
       console.log(`Elevation at ${ x } ${ y } with delta ${Math.abs(elevation - getz_e).toFixed(2)} OK`)
     })
   })

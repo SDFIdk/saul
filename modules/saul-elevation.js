@@ -62,7 +62,7 @@ async function getElevation(x, y, geoTiff) {
   return elevation_data[0][0]
 }
 
-/** Creates an ASCII visualization of a terrain GeoTiff. Useful for display in a terminal.
+/** Creates an ASCII visualization of a GeoTiff with terrain elevation data. Useful for display in a terminal.
  * NOTE: You may want to use a downsmapled GeoTiff to fit within your terminal window. A GeoTiff pixel is represented by 3 characters each.
  * @param {object} gTiff - GeoTiff output from getTerrainGeoTIFF() or getDenmarkGeoTiff() method
  */

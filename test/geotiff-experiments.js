@@ -37,7 +37,7 @@ function fetchKote(worldXY) {
 }
 
 function fetchImageData(imageId) {
-  return fetch(`https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&ids=${imageId}&token=e88d7be6754140025ebeb63d57e991ae`)
+  return fetch(`https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/search?limit=1&crs=http://www.opengis.net/def/crs/EPSG/0/25832&ids=${imageId}&token=${ auth.API_STAC_TOKEN }`)
   .then((response) => response.json())
   .then((data) => {
     return data.features[0]

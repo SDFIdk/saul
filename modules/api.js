@@ -229,7 +229,7 @@ function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05, sizeX = 300) {
   url += `&width=${ width }`
   url += `&bbox=${ bbox[0]},${ bbox[1]},${ bbox[2]},${ bbox[3]}`
 
-  return get(url, {}, false)
+  return get(url, {cache: 'force-cache'}, false)
   .then((response) => {
     return response.arrayBuffer()
   })

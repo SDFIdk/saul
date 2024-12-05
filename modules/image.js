@@ -2,8 +2,7 @@
  * SAUL photogrammetry utilities 
  */
  
-import { getDHM } from './api.js'
-import { getElevation } from './saul-elevation.js'
+import { getElevation, getZ } from './elevation.js'
 
 /** 
  * Converts x,y coordinates from an image to real world lat,lon coordinates
@@ -136,19 +135,6 @@ function radians(degrees) {
   return degrees * (Math.PI / 180)
 }
 
-/** 
- * Fetches a single elevation value based on X,Y coordinates using DHM/Koter endpoint
- * @param {number} xcoor - EPSG:25832 X coordinate
- * @param {number} ycoor - EPSG:25832 Y coordinate
- * @param {{API_DHM_BASEURL: string, API_DHM_USERNAME: string, API_DHM_PASSWORD: string}} auth - API autentication data. See ../config.js.example for reference.
- * @returns {number} Elevation in meters 
- */
-async function getZ(xcoor, ycoor, auth) {
-  let zcoor_data = await getDHM(`?geop=POINT(${xcoor} ${ycoor})&elevationmodel=dtm`, auth)
-  let z = zcoor_data.HentKoterRespons.data[0].kote
-  return z
-}
-
 /** (DEPRECATED - Use getWorldXYZ) Iterates guessing at a world coordinate using image coordinates and elevation info */
 function iterateRecursive(image_data, col, row, z, count, limit, auth, i) {
 
@@ -234,12 +220,36 @@ async function getWorldXYZ(options, precision = 0.3) {
   return best_world_xyz
 }
 
+
+/** 
+ * Iterates over an array of STAC API image items 
+ * and returns a total bounding box for all the images 
+ */
+function getTotalBbox(images) {
+  const initialBbox = images[0].features[0].bbox
+  return images.reduce((bbox, image) => {
+    const imageBbox = image.features[0].bbox
+    if (imageBbox[0] < bbox[0]) {
+      bbox[0] = imageBbox[0]
+    }
+    if (imageBbox[1] < bbox[1]) {
+      bbox[1] = imageBbox[1]
+    }
+    if (imageBbox[2] > bbox[2]) {
+      bbox[2] = imageBbox[2]
+    }
+    if (imageBbox[3] > bbox[3]) {
+      bbox[3] = imageBbox[3]
+    }
+    return bbox
+  }, initialBbox)
+}
+
 export { 
   image2world,
   world2image,
   getWorldXYZ,
   getImageXY,
-  getZ,
-  iterate
+  iterate,
+  getTotalBbox
 }
- 

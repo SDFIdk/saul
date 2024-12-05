@@ -2,8 +2,6 @@
  * SAUL API utilities
  */
 
-import { fromArrayBuffer } from 'geotiff'
-
 let error_msg
 let load_stack = []
 
@@ -194,77 +192,10 @@ function postSTAC(endpoint, data, auth) {
   .then((data) => data)
 }
 
-
-/** Converts raw GeoTIFF arrayBuffer to image */
-async function consumeGeoTIFF(raw_data) {
-  const tiff = await fromArrayBuffer(raw_data)
-  const image = await tiff.getImage()
-  return image
-}
-
-function calcSizeRatio(sizeX, bbox) {
-  const ratio = ( bbox[0] - bbox[2] ) / ( bbox[1] - bbox[3] )
-  return Math.round(sizeX * ratio)
-}
-
-
-/** Fetches a GeoTIFF with elevation data matching the bounding box of a STAC API item (image)
- * @param {object} stac_item - STAC API item from a featureCollection request
- * @param {{API_DHM_WCS_BASEURL: string, API_DHM_TOKENA: string, API_DHM_TOKENB: string}} auth - API autentication data. See ../config.js.example for reference.
- * @param {number} [resolution] - Resolution (1 - 0.01). Higher number means more pixels and better precision.
- * @returns {object} GeoTiff data
- */
-function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05, sizeX = 300) {
-  
-  const bbox = stac_item.bbox
-  const sizeY = calcSizeRatio(sizeX, stac_item.bbox)
-  const width = stac_item.properties ? Math.round( stac_item.properties['proj:shape'][0] * resolution ) : sizeX
-  const height = stac_item.properties ? Math.round( stac_item.properties['proj:shape'][1] * resolution ) : sizeY
-
-  // GET request for DHM WCS data
-  let url = auth.API_DHM_WCS_BASEURL
-  url += '?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0'
-  url += `&username=${ auth.API_DHM_TOKENA }&password=${ auth.API_DHM_TOKENB }`
-  url += `&height=${ height }`
-  url += `&width=${ width }`
-  url += `&bbox=${ bbox[0]},${ bbox[1]},${ bbox[2]},${ bbox[3]}`
-
-  return get(url, {cache: 'force-cache'}, false)
-  .then((response) => {
-    return response.arrayBuffer()
-  })
-  .then((arrayBuffer) => {
-    return consumeGeoTIFF(arrayBuffer)
-  })
-}
-
-/**
- * Fetches a geoTIFF with elevation data covering all of Denmark
- * @param {Object} options
- * @param {Object} options.src - URL to download a pre-generated GeoTiff.
- * @param {Object} options.auth - API autentication data. See ../config.js.example for reference.
- * @param {Number} options.size - Width of the geoTiff image to return
- * @returns GeoTIFF raster with elevation data
- */
-function getDenmarkGeoTiff(options) {
-  if (options.src) {
-    return fetch(options.src)
-    .then(response => response.arrayBuffer())
-    .then(arrayBuffer => consumeGeoTIFF(arrayBuffer))
-  } else {
-    const auth = options.auth
-    const size = options.size ? options.size : 1000
-    return getTerrainGeoTIFF({bbox: [430000,6040000,900000,6413000]}, auth, null, size)
-  }
-}
-
 export {
   get,
   post,
   getSTAC,
   postSTAC,
-  getDHM,
-  getTerrainGeoTIFF,
-  getDenmarkGeoTiff,
-  consumeGeoTIFF
+  getDHM
 }

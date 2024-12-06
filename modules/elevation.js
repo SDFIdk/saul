@@ -199,5 +199,6 @@ export {
   getZ,
   getTerrainGeoTIFF,
   getDenmarkGeoTiff,
-  getTerrainByBbox
+  getTerrainByBbox,
+  consumeGeoTIFF
 }

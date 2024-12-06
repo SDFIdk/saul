@@ -43,7 +43,7 @@ function getDenmarkGeoTiff(options) {
   } else {
     const auth = options.auth
     const size = options.size ? options.size : 1000
-    return getTerrainGeoTIFF({bbox: [430000,6040000,900000,6413000]}, auth, null, size)
+    return getTerrainByBbox([430000,6040000,900000,6413000], auth, size)
   }
 }
 

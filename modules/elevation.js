@@ -179,7 +179,7 @@ function getTerrainByBbox(bbox, auth, sizeLimit = 500) {
   url += `&username=${ auth.API_DHM_TOKENA }&password=${ auth.API_DHM_TOKENB }`
   url += `&height=${ height }`
   url += `&width=${ width }`
-  url += `&bbox=${ Math.round(bbox[0])},${ Math.round(bbox[1])},${ Math.round(bbox[2])},${ Math.round(bbox[3])}`
+  url += `&bbox=${ Math.round(bbox[0]) - 200 },${ Math.round(bbox[1]) - 200 },${ Math.round(bbox[2]) + 200},${ Math.round(bbox[3]) + 200}` // Add/subtract 200 meters to bbox to ensure coverage on the edges
 
   return get(url, {cache: 'force-cache'}, false)
   .then((response) => {

@@ -18,7 +18,8 @@ export {
   visualizeGeotiff,
   getZ,
   getTerrainGeoTIFF,
-  getDenmarkGeoTiff
+  getDenmarkGeoTiff,
+  getTerrainByBbox
 } from './modules/elevation.js'
 
 export {

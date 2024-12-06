@@ -3,7 +3,7 @@
 import auth from '../config.js'
 
 import assert from 'assert'
-import { getElevation, get, getTerrainGeoTIFF, getZ, getWorldXYZ, world2image } from '../index.js'
+import { getElevation, get, getTerrainGeoTIFF, getZ, getWorldXYZ, world2image, getTerrainByBbox } from '../index.js'
 
 console.log('---------------')
 console.log('Elevation tests')
@@ -107,3 +107,12 @@ get(url_stac)
 .catch((err) => {
   console.log('THE ERROR', err)
 })
+
+// Testing getTerrainByBbox()
+try {
+  const gtiff = await getTerrainByBbox([542929.6729020511, 6153925.479277819, 544463.7189110086, 6155242.76541582], auth)
+  assert(gtiff.fileDirectory.ImageWidth === 500, 'GeoTIFF has weird dimensions')
+  console.log('Test getTerrainByBbox() => OK')
+} catch(error) {
+  console.error(error)
+}

@@ -223,10 +223,11 @@ async function getWorldXYZ(options, precision = 0.3) {
 
 /** 
  * Iterates over an array of STAC API image items 
- * and returns a total bounding box for all the images 
+ * and returns a total bounding box for all the images
  */
 function getTotalBbox(images) {
   const initialBbox = images[0].features[0].bbox
+  
   return images.reduce((bbox, image) => {
     const imageBbox = image.features[0].bbox
     if (imageBbox[0] < bbox[0]) {

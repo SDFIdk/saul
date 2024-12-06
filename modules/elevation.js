@@ -22,25 +22,9 @@ function calcSizeRatio(sizeX, bbox) {
 function getTerrainGeoTIFF(stac_item, auth, resolution = 0.05, sizeX = 300) {
   
   const bbox = stac_item.bbox
-  const sizeY = calcSizeRatio(sizeX, stac_item.bbox)
   const width = stac_item.properties ? Math.round( stac_item.properties['proj:shape'][0] * resolution ) : sizeX
-  const height = stac_item.properties ? Math.round( stac_item.properties['proj:shape'][1] * resolution ) : sizeY
 
-  // GET request for DHM WCS data
-  let url = auth.API_DHM_WCS_BASEURL
-  url += '?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0'
-  url += `&username=${ auth.API_DHM_TOKENA }&password=${ auth.API_DHM_TOKENB }`
-  url += `&height=${ height }`
-  url += `&width=${ width }`
-  url += `&bbox=${ bbox[0]},${ bbox[1]},${ bbox[2]},${ bbox[3]}`
-
-  return get(url, {cache: 'force-cache'}, false)
-  .then((response) => {
-    return response.arrayBuffer()
-  })
-  .then((arrayBuffer) => {
-    return consumeGeoTIFF(arrayBuffer)
-  })
+  return getTerrainByBbox(bbox, auth, width)
 }
 
 /**
@@ -178,10 +162,42 @@ async function getZ(xcoor, ycoor, auth) {
   return z
 }
 
+/** Fetches a GeoTIFF with elevation data matching a bounding box of EPSG:25832 coordinates
+ * @param {Array} bbox - Bounding box array consisting of two sets of EPSG:25832 coordinates (ie. `[543049, 6153925, 544463, 6155221]`)
+ * @param {{API_DHM_WCS_BASEURL: string, API_DHM_TOKENA: string, API_DHM_TOKENB: string}} auth - API autentication data. See ../config.js.example for reference.
+ * @param {number} [sizeLimit] - Optional size limiter. Will request GeoTIFF with width that does not exceed this number. Default is 500
+ * @returns {object} GeoTiff data
+ */
+function getTerrainByBbox(bbox, auth, sizeLimit = 500) {
+
+  const width = sizeLimit
+  const height = Math.round(calcSizeRatio(sizeLimit, bbox))
+
+  // GET request for DHM WCS data
+  let url = auth.API_DHM_WCS_BASEURL
+  url += '?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0'
+  url += `&username=${ auth.API_DHM_TOKENA }&password=${ auth.API_DHM_TOKENB }`
+  url += `&height=${ height }`
+  url += `&width=${ width }`
+  url += `&bbox=${ Math.round(bbox[0])},${ Math.round(bbox[1])},${ Math.round(bbox[2])},${ Math.round(bbox[3])}`
+
+  return get(url, {cache: 'force-cache'}, false)
+  .then((response) => {
+    return response.arrayBuffer()
+  })
+  .then((arrayBuffer) => {
+    return consumeGeoTIFF(arrayBuffer)
+  })
+  .catch(error => {
+    return error
+  })
+}
+
 export {
   getElevation,
   visualizeGeotiff,
   getZ,
   getTerrainGeoTIFF,
-  getDenmarkGeoTiff
+  getDenmarkGeoTiff,
+  getTerrainByBbox
 }

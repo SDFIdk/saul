@@ -1,9 +1,8 @@
 import auth from '../config.js'
-import { getElevation, visualizeGeotiff } from '../modules/saul-elevation.js'
-import { getImageXY, getWorldXYZ } from '../modules/saul-core.js'
-import { getDenmarkGeoTiff, consumeGeoTIFF } from '../modules/api.js'
+import { getElevation, getDenmarkGeoTiff, visualizeGeotiff } from '../modules/elevation.js'
+import { getImageXY, getWorldXYZ } from '../modules/image.js'
 
-const geoTiffResolution = 1000
+const geoTiffResolution = 60
 
 const worldxy = [533344, 6172951] // World XY Point in all images near Vejle
 const image1xy = [8566,4105] // Point/Image XY in `image1`
@@ -44,11 +43,6 @@ function fetchImageData(imageId) {
   })
 }
 
-/*
- * Example request to get terrain data for all of DK
- * https://services.datafordeler.dk/DHMNedboer/dhm_wcs/1.0.0/WCS?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0&username=QKJBQATHVS&password=ytxCA8UGM5n0Z*zi&height=1000&width=1000&bbox=430000,6040000,900000,6413000
- */
-
 console.log('-------------------------------------------------------')
 console.log('-- Experiments with pan-Danish GeoTiff terrain model --')
 console.log('-------------------------------------------------------')
@@ -66,10 +60,10 @@ It should
 */
 
 // Get GTiff from API
-// const DKGeoTiff = await getDenmarkGeoTiff({auth: auth, size: geoTiffResolution})
+const DKGeoTiff = await getDenmarkGeoTiff({auth: auth, size: geoTiffResolution})
 
 // Get big GTiff
-const DKGeoTiff = await getDenmarkGeoTiff({src: 'http://localhost:7701/dk-terrain.tiff'})
+//const DKGeoTiff = await getDenmarkGeoTiff({src: 'http://localhost:7701/dk-terrain.tiff'})
 
 // Get tiny GTiff
 //const DKGeoTiff = await getDenmarkGeoTiff({src: 'http://localhost:7701/tiny-dk-terrain.tiff'})
@@ -247,4 +241,4 @@ console.table({
 
 console.log('got DKGeotiff', (DKGeoTiff.source.arrayBuffer.byteLength / 1024), 'Kb', pointø)
 
-//visualizeGeotiff(DKGeoTiff)
+visualizeGeotiff(DKGeoTiff)

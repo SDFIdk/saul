@@ -39,12 +39,14 @@ From within `node_modules/@dataforsyningen/saul` you can run the `test` command 
 npm run test
 ```
 
-## Publish NPM
+## Updating local terrain model
 
-Create a new release in Github to publish an updated NPM package.
-Details are available in the "Npm" section of SDFI ITU's wiki.
+The Saul package includes a terrain elevation model hosted as a single GeoTiff file for events where terrain data from Datafordeler service is unavailable. To update the terrain model, simply download a new GeoTiff from Datafordeler with the following URL (supply your own username/password) and save it to `/assets/dk-terrain.tiff` in the package directory.
+
+https://services.datafordeler.dk/DHMNedboer/dhm_wcs/1.0.0/WCS?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0&username=xxx&password=xxx&height=1000&width=1260&bbox=430000,6040000,900000,6413000
+
 
 ## Acknowledgements
 
 SAUL is made available under the MIT license by
-The Skråfoto Team @ [SDFI](https://sdfi.dk/)
+The Skråfoto Team @ [KDS](https://kds.dk/)

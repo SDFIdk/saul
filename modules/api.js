@@ -170,13 +170,7 @@ function getDHM(query, auth) {
  */
 function getSTAC(query, auth) {
   let requestUrl = `${auth.API_STAC_BASEURL}${query}`
-  const queryStr = query.split('?')[1]
-  if (queryStr) {
-    requestUrl += `&token=${auth.API_STAC_TOKEN}`
-  } else {
-    requestUrl += `?token=${auth.API_STAC_TOKEN}`
-  }
-  return get(requestUrl)
+  return get(requestUrl, {headers: {token: auth.API_STAC_TOKEN}})
   .then((data) => data)
 }
 

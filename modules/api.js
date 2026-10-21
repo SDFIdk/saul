@@ -62,7 +62,12 @@ function getErrorMsg() {
   return error_msg
 }
 
-/** Returns response data */
+/**
+ *  Returns response data
+ * @param {Response} response
+ * @param {boolean} is_json Whether to extract JSON data from the response body.
+ * @returns {(Response|Promise.<object>)} The response object or a Promise with the JavaScript representation of the response body JSON.
+ */
 function HttpResponseHandler(response, is_json) {
   if (!response.ok) {
     error_msg = response.status
@@ -79,12 +84,12 @@ function HttpResponseHandler(response, is_json) {
   
 }
 
-/** 
- * GET HTTP responsee from API
- * @param {string} url - API service URL, including endpoint paths and query parameters.
- * @param {object} [config] - Custom request configs. See https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#supplying_request_options
- * @param {boolean} [is_json] - `true` if requested output is JSON
- * @returns {object} response object
+/**
+ * GET HTTP response from API
+ * @param {string} url API service URL, including endpoint paths and query parameters.
+ * @param {object} [config] Custom request config, see https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#supplying_request_options.
+ * @param {boolean} [is_json=true] `true` (default) if the response body JSON shall be converted to JavaScript representation and returned, `false` if the response object shall be returned.
+ * @returns {Promise<(Response|object)>} A Promise with the response object or with the JavaScript representation of the response body JSON.
  */
 function get(url, config = {}, is_json = true) {
   if (!url) {
@@ -150,16 +155,18 @@ function post(url, requestbody, token) {
   }
 }
 
-/** 
- * API method to fetch data from DHM
- * @param {string} query - DHM API query. Find details at https://datafordeler.dk/dataoversigt/danmarks-hoejdemodel-dhm/koter/
- * @param {{API_DHM_BASEURL: string, API_DHM_TOKENA: string, API_DHM_TOKENB: string}} auth - API autentication data. See ../config.js.example for reference.
- * @returns {object} Response data
+/**
+ * Fetch data from DHM
+ * @param {string} query DHM API query. Find details at https://datafordeler.dk/dataoversigt/danmarks-hoejdemodel-dhm/dhm-wms/
+ * @param {object} auth API autentication data. See ../config.js.example for reference.
+ * @param {string} auth.API_DHM_WMS_BASEURL The base URL of the DHM WMS endpoint.
+ * @param {string} auth.API_DHM_KEY Your API key to access services on Datafordeler.
+ * @returns {Promise.<string>} Eventually the response body text.
  */
 function getDHM(query, auth) {
-  const auth_params = `&username=${auth.API_DHM_TOKENA}&password=${auth.API_DHM_TOKENB}`
-  return get(encodeURI(auth.API_DHM_BASEURL + query + auth_params), {cache: 'force-cache'})
-  .then((data) => data)
+  const auth_params = `&apikey=${encodeURIComponent(auth.API_DHM_KEY)}`
+  return get(auth.API_DHM_WMS_BASEURL + '?SERVICE=WMS&VERSION=1.3.0' + query + auth_params, { cache: 'force-cache' }, false)
+    .then((response) => response.text())
 }
 
 /** 

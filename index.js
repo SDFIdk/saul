@@ -1,11 +1,8 @@
 // Import/export modules with their public methods
 
 export {
-  postSTAC,
   getSTAC,
-  getDHM,
-  get,
-  post
+  get
 } from './modules/api.js'
 
 export {
@@ -17,6 +14,7 @@ export {
   getElevation,
   visualizeGeotiff,
   getZ,
+  DHMParseError,
   getTerrainGeoTIFF,
   getDenmarkGeoTiff,
   getTerrainByBbox,

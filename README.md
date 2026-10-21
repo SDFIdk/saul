@@ -11,7 +11,7 @@ You can use these as building blocks for your own web application that wants to 
 npm i --save @dataforsyningen/saul
 ```
 
-2. Create a configuration file or Javascript object with proper values and make sure to load it into your application before using any of the SAUL utilities. This package ships with an example configuration file at `/example/config.js.example`
+2. Create a configuration file or Javascript object with proper values and make sure to load it into your application before using any of the SAUL utilities. This package ships with an example configuration file at [`config.js.example`](config.js.example)
 
 ## How to use
 
@@ -39,11 +39,16 @@ From within `node_modules/@dataforsyningen/saul` you can run the `test` command 
 npm run test
 ```
 
+Or if you have Docker, you may run the test in a container:
+```shell
+docker compose run --rm saul
+```
+
 ## Updating local terrain model
 
 The Saul package includes a terrain elevation model hosted as a single GeoTiff file for events where terrain data from Datafordeler service is unavailable. To update the terrain model, simply download a new GeoTiff from Datafordeler with the following URL (supply your own username/password) and save it to `/assets/dk-terrain.tiff` in the package directory.
 
-https://services.datafordeler.dk/DHMNedboer/dhm_wcs/1.0.0/WCS?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0&username=xxx&password=xxx&height=1000&width=1260&bbox=430000,6040000,900000,6413000
+https://wcs.datafordeler.dk/DHMNedboer/dhm_wcs/1.0.0/WCS?SERVICE=WCS&COVERAGE=dhm_terraen&RESPONSE_CRS=epsg:25832&CRS=epsg:25832&FORMAT=GTiff&REQUEST=GetCoverage&VERSION=1.0.0&apikey=xxx&height=1000&width=1260&bbox=430000,6040000,900000,6413000
 
 
 ## Acknowledgements

@@ -187,8 +187,8 @@ async function getZ(xcoor, ycoor, auth) {
   if (text_begin.test(dhm_text)) {
     const zsubstr = dhm_text.slice(text_begin.lastIndex)
     const z = parseFloat(zsubstr)
-    if (z) return z
-    throw new DHMParseError('Cannot parse float value in response text from DHM GetFeatureInfo after pattern.', { cause: { response: dhm_text, index: text_begin.lastIndex, slice: zsubstr, x: xcoor, y: ycoor, coords: coords } })
+    if (isNaN(z)) throw new DHMParseError('Cannot parse float value in response text from DHM GetFeatureInfo after pattern.', { cause: { response: dhm_text, index: text_begin.lastIndex, slice: zsubstr, x: xcoor, y: ycoor, coords: coords } })
+    return z
   }
   throw new DHMParseError('Cannot match response text from DHM GetFeatureInfo with pattern.', { cause: { response: dhm_text, pattern: text_begin, x: xcoor, y: ycoor, coords: coords } })
 }

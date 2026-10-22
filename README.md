@@ -1,6 +1,6 @@
 # SAUL
 
-This is a collection of stand-alone methods for photogrammetry calculations and API interactions that are primarily used by https://github.com/SDFIdk/skraafoto_frontend
+This is a collection of stand-alone methods for photogrammetry calculations and API interactions that are primarily used by https://github.com/Klimadatastyrelsen/skraafoto_frontend
 
 You can use these as building blocks for your own web application that wants to interface with STAC API for Danske Skråfotos.
 

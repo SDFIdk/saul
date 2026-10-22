@@ -1,6 +1,6 @@
 {
   "name": "@dataforsyningen/saul",
-  "version": "5.0.0",
+  "version": "5.0.1-alpha",
   "description": "This is a collection of stand-alone methods for photogrammetry calculations and API interactions for 'Danske Skråfotos'.",
   "main": "index.js",
   "type": "module",
@@ -14,7 +14,8 @@
   },
   "keywords": [
     "skråfoto",
-    "SDFI", "KDS",
+    "SDFI",
+    "KDS",
     "saul"
   ],
   "author": {

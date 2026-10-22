@@ -44,6 +44,19 @@ try {
   console.error(error)
 }
 
+// Test getZ 0
+try {
+
+  let elevation = await getZ(535022.36, 6173550.97, auth)
+
+  assert.almostEqual(elevation, 0, deviation, 'getZ 0 fail: Elevation is way apart from expected:')
+  
+  console.log("Test getZ 0 OK")
+
+} catch(error) {
+  console.error("Test getZ 0", error)
+}
+
 // Test iterate
 try {
 
